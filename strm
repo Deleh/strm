@@ -25,7 +25,7 @@ function print_usage {
 }
 
 function error {
-    echo -ne "$text_bold$text_red""ERROR$text_reset: $1\n" >&2
+    echo -ne "$text_bold$text_red""ERROR$text_reset $1\n" >&2
     exit 1
 }
 
