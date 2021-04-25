@@ -95,6 +95,9 @@ if [ "$media_directories" == "" ]; then
     fi
 fi
 
+# Remove possible whitespace characters from media directories string
+media_directories=${media_directories//[[:blank:]]/}
+
 # Read media directories
 IFS="," read -a media_directories <<< "$media_directories"
 
