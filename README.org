@@ -9,12 +9,13 @@
 
   #+begin_src text
     movies
+    ├── ...
     ├── The Daily Dweebs (2017)
     │   └── The Daily Dweebs (2017).mkv
     └── ...
   #+end_src
 
-  If strm is configured to use the =move= directory, you can play the shortfilm with the following command:
+  If strm is configured to use the =movies= directory, you can play the shortfilm with the following command:
 
   #+begin_src sh
     strm daily dweebs
