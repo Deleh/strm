@@ -18,6 +18,10 @@ function print_usage {
     exit 0
 }
 
+function error {
+    echo "ERROR: $1" >&2
+}
+
 # Check if mpv is installed
 if ! command -v mpv &>/dev/null
 then
@@ -39,7 +43,7 @@ while (( "$#" )); do
 		config="$2"
 		shift 2
 	    else
-		echo "Argument for $1 is missing"
+		error "Argument for $1 is missing"
 		exit 1
 	    fi
             ;;
@@ -65,19 +69,18 @@ done
 if test -f "$config"; then
     . "$config"
 else
-    echo "Config file not found ($config)"
-    echo "Please create it or set one with the --config flag"
+    error "Config file not found ($config)"
     exit 1
 fi
 
 # Check validity of variables
 config_valid=true
 if [ "$connection_string" == "" ]; then
-    echo "Connection string is missing"
+    error "Connection string is missing"
     config_valid=false
 fi
 if [ "$media_directory" == "" ]; then
-    echo "Media directory is missing"
+    error "Media directory is missing"
     config_valid=false
 else
     # Check if media directory has trailing slash and add it if missing
