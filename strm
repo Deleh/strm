@@ -146,6 +146,8 @@ if [ "$list" == false ]; then
         echo -e "Playing the following files:\n"
     fi
 fi
+
+# Print results
 for result in "${print_results[@]}"; do
     echo "$result"
 done
