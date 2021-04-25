@@ -25,7 +25,7 @@ then
     exit 1
 fi
 
-# Set default config path
+# Set default values
 config="$HOME/.config/strm/strm.config"
 shuffle=false
 
