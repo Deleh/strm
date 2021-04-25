@@ -19,7 +19,7 @@ function print_usage {
 }
 
 # Check if mpv is installed
-if ! command -v mpv &> /dev/null
+if ! command -v mpv &>/dev/null
 then
     echo "mpv was not found, please install it"
     exit 1
@@ -27,16 +27,21 @@ fi
 
 # Set default values
 config="$HOME/.config/strm/strm.config"
+list=false
 shuffle=false
+query=""
 
 # Parse arguments
-list=false
-for arg in "$@"; do
-    case $arg in
+while (( "$#" )); do
+    case "$1" in
         -c|--config)
-            config="$2"
-            shift
-            shift
+	    if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+		config="$2"
+		shift 2
+	    else
+		echo "Argument for $1 is missing"
+		exit 1
+	    fi
             ;;
         -h|--help)
             print_usage
@@ -50,7 +55,7 @@ for arg in "$@"; do
             shift
             ;;
         *)
-            query+=("$1")
+            query="$query\*$1"
             shift
             ;;
     esac
@@ -82,16 +87,13 @@ if [ "$config_valid" == false ]; then
     echo "Please check your config file ($config)"
     exit 1
 fi
-if [ "${#query[@]}" == 0 ]; then
+if [ "$query" == "" ]; then
     print_usage
 fi
 
-# Build search string from input arguments
-query="\*$( IFS=$'*'; echo "${query[*]}" )\*"
-
 # Get search results from remote
 # Look for paths matching given queries in visible directories, listing only filenames and links
-mapfile -t results < <(ssh "$connection_string" find "$media_directory" -not -path \"*/\.*\" -type l,f -ipath "$query" | sort)
+mapfile -t results < <(ssh "$connection_string" find "$media_directory" -not -path \"*/\.*\" -type l,f -ipath "$query\*" | sort)
 
 # List files
 if [ "$list" == false ]; then
