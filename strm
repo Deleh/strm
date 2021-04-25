@@ -16,7 +16,7 @@ function print_usage {
     echo "  strm -l .             # List all available files"
     echo "  strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream' in order"
     echo "  strm e*phants         # Play files whose path matches the wildcard 'e*phants'"
-    exit 0
+    exit
 }
 
 function error {
@@ -131,6 +131,12 @@ for media_directory in "${media_directories[@]}"; do
     sftp_results=("${sftp_results[@]}" "${tmp_sftp_results[@]}")
     print_results=("${print_results[@]}" "${tmp_print_results[@]}")
 done
+
+# Exit if no results found
+if [ "${#sftp_results[@]}" == 0 ]; then
+    echo "No files found with given query"
+    exit
+fi
 
 # List files
 if [ "$list" == false ]; then
