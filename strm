@@ -114,6 +114,8 @@ for media_directory in "${media_directories[@]}"; do
     # Get connection string and remote directory
     IFS="/" read -r connection_string directory <<< "$media_directory"
 
+    echo "Fetching results from $connection_string"
+    
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
 
@@ -132,20 +134,26 @@ for media_directory in "${media_directories[@]}"; do
     print_results=("${print_results[@]}" "${tmp_print_results[@]}")
 done
 
+echo
+
 # Exit if no results found
 if [ "${#sftp_results[@]}" == 0 ]; then
     echo "No files found with given query"
     exit
 fi
 
-# List files
+# Print result header
 if [ "$list" == false ]; then
     if [ "$shuffle" == true ]; then
-        echo -e "Playing the following files in random order:\n"
+        echo "Playing the following files in random order:"
     else
-        echo -e "Playing the following files:\n"
+        echo "Playing the following files:"
     fi
+else
+    echo "Found the following files:"
 fi
+
+echo
 
 # Print results
 for result in "${print_results[@]}"; do
