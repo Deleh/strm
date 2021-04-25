@@ -113,6 +113,8 @@ if [ "$list" == false ]; then
         results["$i"]="sftp://$connection_string${results[$i]}"
     done
 
+    echo
+    
     # Play all remote files
     if [ "$shuffle" == true ]; then
         mpv --shuffle "${results[@]}"
