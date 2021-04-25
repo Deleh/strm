@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Text formatting variables
+text_reset="\e[0m"
+text_bold="\e[1m"
+text_red="\e[31m"
+
 function print_usage {
     echo "Usage: strm [OPTIONS] QUERY ... [OPTIONS]"
     echo
@@ -20,7 +25,7 @@ function print_usage {
 }
 
 function error {
-    echo "ERROR: $1" >&2
+    echo -ne "$text_bold$text_red""ERROR$text_reset: $1\n" >&2
     exit 1
 }
 
@@ -114,7 +119,7 @@ for media_directory in "${media_directories[@]}"; do
     # Get connection string and remote directory
     IFS="/" read -r connection_string directory <<< "$media_directory"
 
-    echo "Fetching results from $connection_string"
+    echo -ne "Fetching results from $text_bold$connection_string$text_reset\n"
     
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
@@ -127,7 +132,7 @@ for media_directory in "${media_directories[@]}"; do
     # Build SFTP strings and printable strings
     for i in "${!tmp_results[@]}"; do
         tmp_sftp_results["$i"]="sftp://$connection_string${tmp_results[$i]}"
-	tmp_print_result="${tmp_results[$i]}"
+	tmp_print_result="$text_bold$connection_string$text_reset ${tmp_results[$i]}"
 	tmp_print_results["$i"]="${tmp_print_result/$directory/}"
     done
     sftp_results=("${sftp_results[@]}" "${tmp_sftp_results[@]}")
@@ -138,7 +143,7 @@ echo
 
 # Exit if no results found
 if [ "${#sftp_results[@]}" == 0 ]; then
-    echo "No files found with given query"
+    echo "No files found"
     exit
 fi
 
@@ -157,7 +162,7 @@ echo
 
 # Print results
 for result in "${print_results[@]}"; do
-    echo "$result"
+    echo -ne "$result\n"
 done
 
 # Play results if --list flag not set
