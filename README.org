@@ -24,8 +24,11 @@
 ** Features
 
    - List remote files by query
-   - Play remote files locally via mpv
-   
+   - Play remote files via mpv
+   - Query multiple remote directories with one command
+
+   You can access your local machine also via SSH, so every occurrence of /remote/ in the list can be replaced with /local/.
+
 ** Installation
 
    Make sure, mpv is installed and that you have access to a machine via SSH.
