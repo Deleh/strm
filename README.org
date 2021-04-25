@@ -24,7 +24,7 @@
 ** Features
 
    - List remote files by query
-   - Play remote flies by query via mpv
+   - Play remote files locally via mpv
    
 ** Installation
 
