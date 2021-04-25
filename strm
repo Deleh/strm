@@ -115,8 +115,8 @@ if [ "$list" == false ]; then
 
     # Play all remote files
     if [ "$shuffle" == true ]; then
-        mpv --no-terminal --shuffle "${results[@]}"
+        mpv --shuffle "${results[@]}"
     else
-        mpv --no-terminal "${results[@]}"
+        mpv "${results[@]}"
     fi
 fi
