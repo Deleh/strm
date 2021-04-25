@@ -78,8 +78,9 @@
      # Media directories on remote machines of the following form:
      #
      #   <SSH connection string><absolute_path_to_media_directory>
-     # 
+     #
      # Multiple media directories can be set with a comma (,) as delimiter.
+     # Media directories are queried and played in order.
      #
      # Examples:
      #   localhost/home/bob/videos
