@@ -64,8 +64,7 @@
    The usual [[https://mpv.io/manual/master/#interactive-control][mpv controls]] are available while playback.
    Here is a subset:
    
-   - =LEFT= and =RIGHT= :: Seek backward/forward 5 seconds.
-   - =UP= and =DOWN= :: Seek backward/forward 1 minute.
+   - =LEFT= and =RIGHT= :: Seek backward/forward.
    - =p= and =SPACE= :: Pause (pressing again unpauses).
    - =<= and =>= :: Go backward/forward in the playlist.
    - =q= :: Stop playing and quit.
