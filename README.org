@@ -2,7 +2,7 @@
 
   *strm* is a small Bash script that lets you stream media files over SSH.
 
-  No need for mounting via SSHFS and navigating through folders anymore.
+  No need for mounting and navigating through complex directory structures anymore.
   Just provide a query and the media files are played locally via [[https://mpv.io/][mpv]].
 
   Here is an example.. let's assume you have the shortfilm [[https://www.dailydweebs.com/][The Daily Dweebs]] stored on a remote machine in the following directory structure:
