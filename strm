@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+
+function print_usage {
+    echo "Usage: strm [OPTIONS] QUERY ... [OPTIONS]"
+    echo
+    echo "Stream media over SSH."
+    echo
+    echo "OPTIONS"
+    echo "  -h, --help                Show this help message"
+    echo "  -c, --config CONFIG_FILE  Path to config file"
+    echo "  -l, --list                List files instead of playing"
+    echo "  -s, --shuffle             Play files in random order"
+    echo
+    echo "EXAMPLES"
+    echo "  strm -l .             # List all available files"
+    echo "  strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream' in order"
+    echo "  strm e*phants         # Play files whose path matches the wildcard 'e*phants'"
+    exit 0
+}
+
+# Check if mpv is installed
+if ! command -v mpv &> /dev/null
+then
+    echo "mpv was not found, please install it"
+    exit 1
+fi
+
+# Set default config path
+config="$HOME/.config/strm/strm.config"
+shuffle=false
+
+# Parse arguments
+list=false
+for arg in "$@"; do
+    case $arg in
+        -c|--config)
+            config="$1"
+            shift
+            ;;
+        -h|--help)
+            print_usage
+            ;;
+        -l|--list)
+            list=true
+            shift
+            ;;
+        -s|--shuffle)
+            shuffle=true
+            shift
+            ;;
+        *)
+            query+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Read config file
+if test -f "$config"; then
+    . "$config"
+else
+    echo "Config file not found ($config)"
+    echo "Please create it or set one with the --config flag"
+    exit 1
+fi
+
+# Check validity of variables
+config_valid=true
+if [ "$connection_string" == "" ]; then
+    echo "Connection string is missing"
+    config_valid=false
+fi
+if [ "$media_directory" == "" ]; then
+    echo "Media directory is missing"
+    config_valid=false
+else
+    # Check if media directory has trailing slash and add it if missing
+    [[ "$media_directory" != */ ]] && media_directory="$media_directory/"
+fi
+if [ "$config_valid" == false ]; then
+    echo "Please check your config file ($config)"
+    exit 1
+fi
+if [ "${#query[@]}" == 0 ]; then
+    print_usage
+fi
+
+# Build search string from input arguments
+query="\*$( IFS=$'*'; echo "${query[*]}" )\*"
+
+# Get search results from remote
+# Look for paths matching given queries in visible directories, listing only filenames and links
+mapfile -t results < <(ssh "$connection_string" find "$media_directory" -not -path \"*/\.*\" -type l,f -ipath "$query" | sort)
+
+# List files
+if [ "$list" == false ]; then
+    if [ "$shuffle" == true ]; then
+        echo -e "Playing the following files in random order:\n"
+    else
+        echo -e "Playing the following files:\n"
+    fi
+fi
+for i in "${!results[@]}"; do
+    res="${results[$i]}"
+    echo "${res/$media_directory/}"
+done
+
+# Play results if --list flag not set
+if [ "$list" == false ]; then
+    
+    # Build SFTP strings
+    for i in "${!results[@]}"; do
+        results["$i"]="sftp://$connection_string${results[$i]}"
+    done
+
+    # Play all remote files
+    if [ "$shuffle" == true ]; then
+        mpv --no-terminal --shuffle "${results[@]}"
+    else
+        mpv --no-terminal "${results[@]}"
+    fi
+fi

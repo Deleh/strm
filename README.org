@@ -1,0 +1,76 @@
+* strm
+
+  *strm* is a small Bash script that lets you stream media files over SSH.
+
+  No need for mounting via SSHFS and navigating through folders anymore.
+  Just provide a query and the media files are played locally via [[https://mpv.io/][mpv]].
+
+** Features
+
+   - List remote files by query
+   - Play remote flies by query via mpv
+   
+** Installation
+
+   Make sure, mpv is installed and that you have access to a remote machine via SSH.
+
+   strm is just a script, you can execute it directly.
+   Or grab it and place it in you =$PATH=.
+
+   This project is also a [[https://nixos.wiki/wiki/Flakes][Nix flake]].
+   You can execute it with the following command if you have a recent version of [[https://nixos.org/][Nix]] installed and flakes are enabled:
+
+   #+begin_src sh
+     nix run github:Deleh/strm -- --help
+   #+end_src
+
+   If you use it this way, mpv is started with *MPRIS* support by default.
+
+** Usage
+
+   #+begin_src text
+     Usage: strm [OPTIONS] QUERY ... [OPTIONS]
+
+     Stream media over SSH.
+
+     OPTIONS
+       -h, --help                Show this help message
+       -c, --config CONFIG_FILE  Path to config file
+       -l, --list                List files instead of playing
+       -s, --shuffle             Play files in random order
+
+     EXAMPLES
+       strm -l .             # List all available files
+       strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream' in order
+       strm e*phants         # Play files whose path matches the wildcard 'e*phants'
+   #+end_src
+
+** Configuration
+
+   The scripts expects a config file with the following content:
+
+   #+begin_src sh
+     # SSH connection string
+     # Examples:
+     #   remote             # Current user at hostname 'remote' on port 22
+     #   user@10.0.0.1      # 'user' at address '10.0.0.1' on port 22
+     #   user@10.0.0.1:600  # 'user' at address '10.0.0.1' on port 600
+     connection_string=""
+
+     # Absolute path to media directory on remote machine
+     # Example:
+     #   /home/<user>/video
+     media_directory=""
+   #+end_src
+
+   An example configuration file can be found in =./strm.config=.
+   
+   The default path of the configuration is =$HOME/.config/strm/strm.config=.
+   You can use the =--config= flag to set another configuration path.
+   This is useful if you are using multiple remote machines or different media folders.
+   One can set e.g. aliases for different streaming resources:
+
+  #+begin_src sh
+    alias mstrm="strm -c <path_to_music_config>"
+    alias vstrm="strm -c <path_to_video_config>" 
+  #+end_src
