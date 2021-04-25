@@ -28,7 +28,7 @@
    
 ** Installation
 
-   Make sure, mpv is installed and that you have access to a remote machine via SSH.
+   Make sure, mpv is installed and that you have access to a machine via SSH.
 
    strm is just a script, you can execute it directly.
    Or grab it and place it in you =$PATH=.
@@ -93,3 +93,4 @@
    
    The default path of the configuration is =$HOME/.config/strm/strm.config=.
    You can use the =--config= flag to set another configuration file.
+   The flag =--media-directories= is used in favour of a configuration file.
