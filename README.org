@@ -47,13 +47,14 @@
    #+begin_src text
      Usage: strm [OPTIONS] QUERY ... [OPTIONS]
 
-     Stream media over SSH.
+     Stream media files over SSH.
 
      OPTIONS
-       -h, --help                Show this help message
-       -c, --config CONFIG_FILE  Path to config file
-       -l, --list                List files instead of playing
-       -s, --shuffle             Play files in random order
+       -h, --help                                 Show this help message
+       -c, --config CONFIG_FILE                   Path to config file
+       -l, --list                                 List files instead of playing
+       -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored
+       -s, --shuffle                              Play files in random order
 
      EXAMPLES
        strm -l .             # List all available files
@@ -71,30 +72,23 @@
 
 ** Configuration
 
-   The scripts expects a configuration file with the following content:
+   If the =--media-directories= argument is not set, the scripts looks for a configuration file with the following content:
 
    #+begin_src sh
-     # SSH connection string
+     # Media directories on remote machines of the following form:
+     #
+     #   <SSH connection string><absolute_path_to_media_directory>
+     # 
+     # Multiple media directories can be set with a comma (,) as delimiter.
+     #
      # Examples:
-     #   remote             # Current user at hostname 'remote' on port 22
-     #   user@10.0.0.1      # 'user' at address '10.0.0.1' on port 22
-     #   user@10.0.0.1:600  # 'user' at address '10.0.0.1' on port 600
-     connection_string=""
-
-     # Absolute path to media directory on remote machine
-     # Example:
-     #   /home/<user>/video
-     media_directory=""
+     #   localhost/home/bob/videos
+     #   remote-machine/home/bob/music
+     #   bob@another-machine/media/movies,bob@10.0.0.1/home/bob/series
+     media_directories=""
    #+end_src
 
    An example configuration file can be found in =./strm.config=.
    
    The default path of the configuration is =$HOME/.config/strm/strm.config=.
    You can use the =--config= flag to set another configuration file.
-   This is useful if you are using multiple remote machines or different media folders.
-   One can set e.g. aliases for different streaming resources:
-
-  #+begin_src sh
-    alias mstrm="strm -c <path_to_music_config>"
-    alias vstrm="strm -c <path_to_video_config>" 
-  #+end_src

@@ -6,10 +6,11 @@ function print_usage {
     echo "Stream media files over SSH."
     echo
     echo "OPTIONS"
-    echo "  -h, --help                Show this help message"
-    echo "  -c, --config CONFIG_FILE  Path to config file"
-    echo "  -l, --list                List files instead of playing"
-    echo "  -s, --shuffle             Play files in random order"
+    echo "  -h, --help                                 Show this help message"
+    echo "  -c, --config CONFIG_FILE                   Path to config file"
+    echo "  -l, --list                                 List files instead of playing"
+    echo "  -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored"
+    echo "  -s, --shuffle                              Play files in random order"
     echo
     echo "EXAMPLES"
     echo "  strm -l .             # List all available files"
@@ -20,13 +21,13 @@ function print_usage {
 
 function error {
     echo "ERROR: $1" >&2
+    exit 1
 }
 
 # Check if mpv is installed
 if ! command -v mpv &>/dev/null
 then
-    echo "mpv was not found, please install it"
-    exit 1
+    error "mpv was not found, please install it"
 fi
 
 # Set default values
@@ -34,6 +35,7 @@ config="$HOME/.config/strm/strm.config"
 list=false
 shuffle=false
 query=""
+media_directories=""
 
 # Parse arguments
 while (( "$#" )); do
@@ -44,7 +46,6 @@ while (( "$#" )); do
 		shift 2
 	    else
 		error "Argument for $1 is missing"
-		exit 1
 	    fi
             ;;
         -h|--help)
@@ -53,6 +54,14 @@ while (( "$#" )); do
         -l|--list)
             list=true
             shift
+            ;;
+	-m|--media-directories)
+	    if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+		media_directories="$2"
+		shift 2
+	    else
+		error "Argument for $1 is missing"
+	    fi
             ;;
         -s|--shuffle)
             shuffle=true
@@ -65,38 +74,60 @@ while (( "$#" )); do
     esac
 done
 
-# Read config file
-if test -f "$config"; then
-    . "$config"
-else
-    error "Config file not found ($config)"
-    exit 1
-fi
-
-# Check validity of variables
-config_valid=true
-if [ "$connection_string" == "" ]; then
-    error "Connection string is missing"
-    config_valid=false
-fi
-if [ "$media_directory" == "" ]; then
-    error "Media directory is missing"
-    config_valid=false
-else
-    # Check if media directory has trailing slash and add it if missing
-    [[ "$media_directory" != */ ]] && media_directory="$media_directory/"
-fi
-if [ "$config_valid" == false ]; then
-    echo "Please check your config file ($config)"
-    exit 1
-fi
+# Print usage if no query was given
 if [ "$query" == "" ]; then
     print_usage
 fi
 
-# Get search results from remote
-# Look for paths matching given queries in visible directories, listing only filenames and links
-mapfile -t results < <(ssh "$connection_string" find "$media_directory" -not -path \"*/\.*\" -type l,f -ipath "$query\*" | sort)
+# If no media directory was set load config file
+if [ "$media_directories" == "" ]; then
+
+    # Read config file
+    if test -f "$config"; then
+	. "$config"
+    else
+	error "Config file not found ($config)"
+    fi
+
+    # Throws error if still no media directory set
+    if [ "$media_directories" == "" ]; then
+	error "No media directory specified"
+    fi
+fi
+
+# Read media directories
+IFS="," read -a media_directories <<< "$media_directories"
+
+# Initialize result arrays
+sftp_results=()
+print_results=()
+
+# Get results from every media directory
+for media_directory in "${media_directories[@]}"; do
+
+    tmp_sftp_results=()
+    tmp_print_results=()
+
+    # Get connection string and remote directory
+    IFS="/" read -r connection_string directory <<< "$media_directory"
+
+    # Add leading and trailing slash to directory if missing
+    [[ "$directory" != /*/ ]] && directory="/$directory/"
+
+
+    # Get search results from remote
+    # Look for paths matching given queries in visible directories, listing only filenames and links
+    mapfile -t tmp_results < <(ssh "$connection_string" find "$directory" -not -path \"*/\.*\" -type l,f -ipath "$query\*" | sort)
+
+    # Build SFTP strings and printable strings
+    for i in "${!tmp_results[@]}"; do
+        tmp_sftp_results["$i"]="sftp://$connection_string${tmp_results[$i]}"
+	tmp_print_result="${tmp_results[$i]}"
+	tmp_print_results["$i"]="${tmp_print_result/$directory/}"
+    done
+    sftp_results=("${sftp_results[@]}" "${tmp_sftp_results[@]}")
+    print_results=("${print_results[@]}" "${tmp_print_results[@]}")
+done
 
 # List files
 if [ "$list" == false ]; then
@@ -106,25 +137,19 @@ if [ "$list" == false ]; then
         echo -e "Playing the following files:\n"
     fi
 fi
-for i in "${!results[@]}"; do
-    res="${results[$i]}"
-    echo "${res/$media_directory/}"
+for result in "${print_results[@]}"; do
+    echo "$result"
 done
 
 # Play results if --list flag not set
 if [ "$list" == false ]; then
-    
-    # Build SFTP strings
-    for i in "${!results[@]}"; do
-        results["$i"]="sftp://$connection_string${results[$i]}"
-    done
 
     echo
-    
+
     # Play all remote files
     if [ "$shuffle" == true ]; then
-        mpv --shuffle "${results[@]}"
+        mpv --shuffle "${sftp_results[@]}"
     else
-        mpv "${results[@]}"
+        mpv "${sftp_results[@]}"
     fi
 fi
