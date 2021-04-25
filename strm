@@ -34,7 +34,8 @@ list=false
 for arg in "$@"; do
     case $arg in
         -c|--config)
-            config="$1"
+            config="$2"
+            shift
             shift
             ;;
         -h|--help)
