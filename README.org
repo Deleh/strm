@@ -90,7 +90,7 @@
    An example configuration file can be found in =./strm.config=.
    
    The default path of the configuration is =$HOME/.config/strm/strm.config=.
-   You can use the =--config= flag to set another configuration path.
+   You can use the =--config= flag to set another configuration file.
    This is useful if you are using multiple remote machines or different media folders.
    One can set e.g. aliases for different streaming resources:
 
