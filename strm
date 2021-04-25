@@ -3,7 +3,7 @@
 function print_usage {
     echo "Usage: strm [OPTIONS] QUERY ... [OPTIONS]"
     echo
-    echo "Stream media over SSH."
+    echo "Stream media files over SSH."
     echo
     echo "OPTIONS"
     echo "  -h, --help                Show this help message"
