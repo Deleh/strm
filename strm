@@ -3,7 +3,6 @@
 # Text formatting variables
 text_reset="\e[0m"
 text_bold="\e[1m"
-text_red="\e[31m"
 
 function print_usage {
     echo "Usage: strm [OPTIONS] QUERY ... [OPTIONS]"
@@ -24,8 +23,12 @@ function print_usage {
     exit
 }
 
+function print_controls {
+    echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit\n" 
+}
+
 function error {
-    echo -ne "$text_bold$text_red""ERROR$text_reset $1\n" >&2
+    echo -ne "${text_bold}ERROR${text_reset} $1\n" >&2
     exit 1
 }
 
@@ -168,12 +171,12 @@ done
 # Play results if --list flag not set
 if [ "$list" == false ]; then
 
-    echo
+    print_controls
 
     # Play all remote files
     if [ "$shuffle" == true ]; then
-        mpv --shuffle "${sftp_results[@]}"
+        mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${media-title}\e[0m' --shuffle "${sftp_results[@]}"
     else
-        mpv "${sftp_results[@]}"
+        mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${media-title}\e[0m' "${sftp_results[@]}"
     fi
 fi
