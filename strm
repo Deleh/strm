@@ -5,7 +5,7 @@ text_reset="\e[0m"
 text_bold="\e[1m"
 
 function print_usage {
-    echo "Usage: strm [OPTIONS] QUERY ... [OPTIONS]"
+    echo "Usage: strm [OPTIONS] QUERIES ... [OPTIONS]"
     echo
     echo "Stream media files over SSH."
     echo

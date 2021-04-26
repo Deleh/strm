@@ -73,7 +73,7 @@
 ** Usage
 
    #+begin_src text
-     Usage: strm [OPTIONS] QUERY ... [OPTIONS]
+     Usage: strm [OPTIONS] QUERIES ... [OPTIONS]
 
      Stream media files over SSH.
 
