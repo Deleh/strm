@@ -42,7 +42,7 @@ fi
 config="$HOME/.config/strm/strm.config"
 list=false
 shuffle=false
-query=""
+query=()
 media_directories=""
 
 # Parse arguments
@@ -76,14 +76,14 @@ while (( "$#" )); do
             shift
             ;;
         *)
-            query="$query\*$1"
+            query+=("$1")
             shift
             ;;
     esac
 done
 
 # Print usage if no query was given
-if [ "$query" == "" ]; then
+if [ "${#query[@]}" == 0 ]; then
     print_usage
 fi
 
@@ -109,6 +109,20 @@ media_directories=${media_directories//[[:blank:]]/}
 # Read media directories
 IFS="," read -a media_directories <<< "$media_directories"
 
+# Construct find argument array
+find_arguments=()
+for i in "${!query[@]}"; do
+
+    # If more than one query is given add a logical AND
+    if [ "$i" -ge 1 ]; then
+        find_arguments+=("-a")
+    fi
+
+    # Use the ipath argument to search case insensitive
+    find_arguments+=("-ipath")
+    find_arguments+=("'*${query[$i]}*'")
+done
+
 # Initialize result arrays
 sftp_results=()
 print_results=()
@@ -130,7 +144,7 @@ for media_directory in "${media_directories[@]}"; do
 
     # Get search results from remote
     # Look for paths matching given queries in visible directories, listing only filenames and links
-    mapfile -t tmp_results < <(ssh -o ConnectTimeout=10 "$connection_string" find "$directory" -not -path \"*/\.*\" -type l,f -ipath "$query\*" | sort)
+    mapfile -t tmp_results < <(ssh -o ConnectTimeout=10 "$connection_string" find "$directory" -not -path \"*/\.*\" -type l,f "${find_arguments[@]}" | sort)
 
     # Build SFTP strings and printable strings
     for i in "${!tmp_results[@]}"; do
