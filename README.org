@@ -23,8 +23,11 @@
   #+end_src
 
   Every argument which is not assigned to a flag is interpreted as part of the query.
-  The query arguments are then surrounded by wildcards (=*=) and the case gets ignored.
-  If every argument matches any filepath in the configured media directories, the matched filepaths are interpreted as result.
+  The query arguments are interpreted as [[https://en.wikipedia.org/wiki/Glob_(programming)][glob patterns]], additionally surrounded by wildcards (=*=).
+  If every pattern matches any filepath in the configured media directories, the matched filepaths are interpreted as result.
+  The =--or= flag can be set to get results which match at least one pattern.
+  Matchings are always done case-insensitive.
+  
   The shortfilm from the example above could have also been played with one of the following commands:
 
   #+begin_src sh
@@ -76,15 +79,16 @@
 
      OPTIONS
        -h, --help                                 Show this help message
-       -c, --config CONFIG_FILE                   Path to config file
+       -c, --config CONFIG_FILE                   Path to config file (default: ~/.config/strm/strm.config)
        -l, --list                                 List files instead of playing
        -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored
+       -o, --or                                   Use a logical OR for queries (default: AND)
        -s, --shuffle                              Play files in random order
 
      EXAMPLES
        strm -l .             # List all available files
        strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream'
-       strm e*phants         # Play files whose path matches the wildcard 'e*phants'
+       strm e*phants         # Play files whose path matches the glob pattern 'e*phants'
    #+end_src
 
    The usual [[https://mpv.io/manual/master/#interactive-control][mpv controls]] are available while playback.
