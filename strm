@@ -18,7 +18,7 @@ function print_usage {
     echo
     echo "EXAMPLES"
     echo "  strm -l .             # List all available files"
-    echo "  strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream' in order"
+    echo "  strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream'"
     echo "  strm e*phants         # Play files whose path matches the wildcard 'e*phants'"
     exit
 }

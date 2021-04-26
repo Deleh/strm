@@ -15,11 +15,32 @@
     └── ...
   #+end_src
 
-  If strm is configured to use the =movies= directory, you can play the shortfilm with the following command:
+  If strm is configured to use the =movies= directory, you can play the shortfilm with e.g. the following command:
 
   #+begin_src sh
     strm daily dweebs
   #+end_src
+
+  Every argument which is not assigned to a flag is interpreted as part of the query.
+  The query arguments are then surrounded by wildcards (=*=) and the case gets ignored.
+  If every argument matches any filepath in the configured media directories, the matched filepaths are interpreted as result.
+  The shortfilm from the example above could have also been played with one of the following commands:
+
+  #+begin_src sh
+    strm dweebs daily
+    strm movies dwee
+    strm d d 17
+  #+end_src
+
+  It is possible that multiple files are matched by one of the commands.
+  All files are then played in the order of the media directories, followed by lexicographical order of the filepath.
+
+  strm consists mainly of two parts:
+
+  1. Execute =find= via SSH on a remote machine
+  2. Play the matched files with =mpv=
+
+  The rest is just bells and whistles.
 
 ** Features
 
@@ -61,7 +82,7 @@
 
      EXAMPLES
        strm -l .             # List all available files
-       strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream' in order
+       strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream'
        strm e*phants         # Play files whose path matches the wildcard 'e*phants'
    #+end_src
 
