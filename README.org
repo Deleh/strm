@@ -16,7 +16,7 @@
         └── ...
   #+end_src
 
-  If strm is configured to use the =media= directory, you can play the shortfilm with e.g. the following command:
+  If strm is configured to use the =media= directory, you can play the shortfilm e.g. with the following command:
 
   #+begin_src sh
     strm daily dweebs
@@ -56,7 +56,7 @@
    Make sure, mpv is installed and that you have access to a machine via SSH.
 
    strm is just a script, you can execute it directly.
-   Or grab it and place it in you =$PATH=.
+   Or grab it and place it in your =$PATH=.
 
    This project is also a [[https://nixos.wiki/wiki/Flakes][Nix flake]].
    You can execute it with the following command if you have a recent version of [[https://nixos.org/][Nix]] installed and flakes are enabled:
