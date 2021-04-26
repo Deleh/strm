@@ -118,7 +118,7 @@ for i in "${!query[@]}"; do
         find_arguments+=("-a")
     fi
 
-    # Use the ipath argument to search case insensitive
+    # Use the ipath argument to search case-insensitive
     find_arguments+=("-ipath")
     find_arguments+=("'*${query[$i]}*'")
 done
