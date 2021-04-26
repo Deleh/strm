@@ -200,6 +200,6 @@ if [ "$list" == false ]; then
     if [ "$shuffle" == true ]; then
         mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${media-title}\e[0m' --shuffle "${sftp_results[@]}"
     else
-        mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${media-title}\e[0m' "${sftp_results[@]}"
+        mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/Artist:}${?metadata/Artist: - }${media-title}\e[0m' "${sftp_results[@]}"
     fi
 fi
