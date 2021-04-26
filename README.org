@@ -8,14 +8,15 @@
   Here is an example.. let's assume you have the shortfilm [[https://www.dailydweebs.com/][The Daily Dweebs]] stored on a remote machine in the following directory structure:
 
   #+begin_src text
-    movies
-    ├── ...
-    ├── The Daily Dweebs (2017)
-    │   └── The Daily Dweebs (2017).mkv
-    └── ...
+    media
+    └── movies
+        ├── ...
+        ├── The Daily Dweebs (2017)
+        │   └── The Daily Dweebs (2017).mkv
+        └── ...
   #+end_src
 
-  If strm is configured to use the =movies= directory, you can play the shortfilm with e.g. the following command:
+  If strm is configured to use the =media= directory, you can play the shortfilm with e.g. the following command:
 
   #+begin_src sh
     strm daily dweebs
@@ -33,7 +34,7 @@
   #+end_src
 
   It is possible that multiple files are matched by one of the commands.
-  All files are then played in the order of the media directories, followed by lexicographical order of the filepath.
+  All files are then played in the order of the configured media directories, followed by lexicographical order of the filepath.
 
   strm consists mainly of two parts:
 
@@ -96,7 +97,7 @@
 
 ** Configuration
 
-   If the =--media-directories= argument is not set, the scripts looks for a configuration file with the following content:
+   If the =--media-directories= argument is not set, the script looks for a configuration file with the following content:
 
    #+begin_src sh
      # Media directories on remote machines of the following form:
@@ -113,7 +114,7 @@
      media_directories=""
    #+end_src
 
-   An example configuration file can be found in =./strm.config=.
+   An example configuration file can be found in the repository.
    
    The default path of the configuration is =$HOME/.config/strm/strm.config=.
    You can use the =--config= flag to set another configuration file.
