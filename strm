@@ -44,7 +44,7 @@ config="$HOME/.config/strm/strm.config"
 list=false
 or=false
 shuffle=false
-query=()
+queries=()
 media_directories=""
 
 # Parse arguments
@@ -85,14 +85,14 @@ while (( "$#" )); do
             error "Unsupported flag $1"
             ;;
         *)
-            query+=("$1")
+            queries+=("$1")
             shift
             ;;
     esac
 done
 
-# Print usage if no query was given
-if [ "${#query[@]}" == 0 ]; then
+# Print usage if no queries were given
+if [ "${#queries[@]}" == 0 ]; then
     print_usage
 fi
 
@@ -121,7 +121,7 @@ IFS="," read -a media_directories <<< "$media_directories"
 # Construct find argument array
 # Ignore hidden files and directories and list only files and symlinks
 find_arguments=("-not" "-path" "'*/\.*'" "-type" "f,l")
-for i in "${!query[@]}"; do
+for i in "${!queries[@]}"; do
 
     # If -o flag is set and more than one query is given, add a logical OR
     if [ "$or" == true ] && [ "$i" -ge 1 ]; then
@@ -129,7 +129,7 @@ for i in "${!query[@]}"; do
     fi
 
     # Use the ipath argument to search case-insensitive and surround query with wildcards
-    find_arguments+=("-ipath" "'*${query[$i]}*'")
+    find_arguments+=("-ipath" "'*${queries[$i]}*'")
 done
 
 # Initialize result arrays
