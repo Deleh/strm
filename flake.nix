@@ -1,5 +1,5 @@
 {
-  description = "Stream media files over SSH.";
+  description = "Stream media files over SSH";
 
   nixConfig.bash-prompt = "\[strm-develop\]$ ";
 
