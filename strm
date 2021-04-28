@@ -5,21 +5,22 @@ text_reset="\e[0m"
 text_bold="\e[1m"
 
 function print_usage {
-    echo "Usage: strm [OPTIONS] QUERY ... [OPTIONS]"
+    echo "Usage: strm [OPTIONS] QUERIES ... [OPTIONS]"
     echo
     echo "Stream media files over SSH."
     echo
     echo "OPTIONS"
     echo "  -h, --help                                 Show this help message"
-    echo "  -c, --config CONFIG_FILE                   Path to config file"
+    echo "  -c, --config CONFIG_FILE                   Path to config file (default: ~/.config/strm/strm.config)"
     echo "  -l, --list                                 List files instead of playing"
     echo "  -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored"
+    echo "  -o, --or                                   Use a logical OR for queries (default: AND)"
     echo "  -s, --shuffle                              Play files in random order"
     echo
     echo "EXAMPLES"
     echo "  strm -l .             # List all available files"
     echo "  strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream'"
-    echo "  strm e*phants         # Play files whose path matches the wildcard 'e*phants'"
+    echo "  strm e*phants         # Play files whose path matches the glob pattern 'e*phants'"
     exit
 }
 
@@ -41,8 +42,9 @@ fi
 # Set default values
 config="$HOME/.config/strm/strm.config"
 list=false
+or=false
 shuffle=false
-query=()
+queries=()
 media_directories=""
 
 # Parse arguments
@@ -71,6 +73,10 @@ while (( "$#" )); do
 		error "Argument for $1 is missing"
 	    fi
             ;;
+	-o|--or)
+	    or=true
+	    shift
+	    ;;
         -s|--shuffle)
             shuffle=true
             shift
@@ -79,14 +85,14 @@ while (( "$#" )); do
             error "Unsupported flag $1"
             ;;
         *)
-            query+=("$1")
+            queries+=("$1")
             shift
             ;;
     esac
 done
 
-# Print usage if no query was given
-if [ "${#query[@]}" == 0 ]; then
+# Print usage if no queries were given
+if [ "${#queries[@]}" == 0 ]; then
     print_usage
 fi
 
@@ -113,17 +119,17 @@ media_directories=${media_directories//[[:blank:]]/}
 IFS="," read -a media_directories <<< "$media_directories"
 
 # Construct find argument array
-find_arguments=()
-for i in "${!query[@]}"; do
+# Ignore hidden files and directories and list only files and symlinks
+find_arguments=("-not" "-path" "'*/\.*'" "-type" "f,l")
+for i in "${!queries[@]}"; do
 
-    # If more than one query is given add a logical AND
-    if [ "$i" -ge 1 ]; then
-        find_arguments+=("-a")
+    # If -o flag is set and more than one query is given, add a logical OR
+    if [ "$or" == true ] && [ "$i" -ge 1 ]; then
+        find_arguments+=("-o" "-not" "-path" "'*/\.*'" "-type" "f,l")
     fi
 
-    # Use the ipath argument to search case-insensitive
-    find_arguments+=("-ipath")
-    find_arguments+=("'*${query[$i]}*'")
+    # Use the ipath argument to search case-insensitive and surround query with wildcards
+    find_arguments+=("-ipath" "'*${queries[$i]}*'")
 done
 
 # Initialize result arrays
@@ -139,7 +145,7 @@ for media_directory in "${media_directories[@]}"; do
     # Get connection string and remote directory
     IFS="/" read -r connection_string directory <<< "$media_directory"
 
-    echo -ne "Fetching results from $text_bold$connection_string$text_reset\n"
+    echo -ne "Fetching results from $text_bold$(basename $directory)$text_reset on $text_bold$connection_string$text_reset\n"
     
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
@@ -147,7 +153,7 @@ for media_directory in "${media_directories[@]}"; do
 
     # Get search results from remote
     # Look for paths matching given queries in visible directories, listing only filenames and links
-    mapfile -t tmp_results < <(ssh -o ConnectTimeout=10 "$connection_string" find "$directory" -not -path \"*/\.*\" -type l,f "${find_arguments[@]}" | sort)
+    mapfile -t tmp_results < <(ssh -o ConnectTimeout=10 "$connection_string" find "$directory" "${find_arguments[@]}" | sort)
 
     # Build SFTP strings and printable strings
     for i in "${!tmp_results[@]}"; do
@@ -192,8 +198,8 @@ if [ "$list" == false ]; then
 
     # Play all remote files
     if [ "$shuffle" == true ]; then
-        mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${media-title}\e[0m' --shuffle "${sftp_results[@]}"
+	mpv --shuffle --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${sftp_results[@]}"
     else
-        mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${media-title}\e[0m' "${sftp_results[@]}"
+        mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${sftp_results[@]}"
     fi
 fi
