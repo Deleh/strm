@@ -54,6 +54,10 @@
 
    You can access your local machine also via SSH, so every occurrence of /remote/ in the list can be replaced with /local/.
 
+   mpv has a nice feature which lets you resume playback.
+   This is handy if you want to e.g. continue watching you favourite series at a later point in time.
+   Check the *usage* below to see how this works.
+   
 ** Installation
 
    Make sure, mpv is installed and that you have access to a machine via SSH.
@@ -98,7 +102,10 @@
    - =p= and =SPACE= :: Pause (pressing again unpauses).
    - =<= and =>= :: Go backward/forward in the playlist.
    - =q= :: Stop playing and quit.
-   - =Q= :: Like =q=, but store the current playback position. Playing the same file later will resume at the old playback position if possible.
+   - =Q= :: Like =q=, but store the current playback position.
+     Playing the same file later will resume at the old playback position if possible.
+     This works for single and mutliple files.
+     To listen e.g. to an audiobook in multiple stages you can always use the same command (=strm audiobook=), just make sure you always quit with =Q=.
 
 ** Configuration
 
