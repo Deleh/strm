@@ -25,7 +25,7 @@ function print_usage {
 }
 
 function print_controls {
-    echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit\n" 
+    echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit, [${text_bold}Q${text_reset}] Save position and quit\n" 
 }
 
 function error {
@@ -150,7 +150,6 @@ for media_directory in "${media_directories[@]}"; do
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
 
-
     # Get search results from remote
     # Look for paths matching given queries in visible directories, listing only filenames and links
     mapfile -t tmp_results < <(ssh -o ConnectTimeout=10 "$connection_string" find "$directory" "${find_arguments[@]}" | sort)
@@ -174,14 +173,14 @@ if [ "${#sftp_results[@]}" == 0 ]; then
 fi
 
 # Print result header
-if [ "$list" == false ]; then
+if [ "$list" == true ]; then
+    echo "Found the following files:"
+else
     if [ "$shuffle" == true ]; then
         echo "Playing the following files in random order:"
     else
         echo "Playing the following files:"
     fi
-else
-    echo "Found the following files:"
 fi
 
 echo
@@ -196,10 +195,12 @@ if [ "$list" == false ]; then
 
     print_controls
 
-    # Play all remote files
+    # Construct addtitional mpv arguments
+    mpv_arguments=()
     if [ "$shuffle" == true ]; then
-	mpv --shuffle --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${sftp_results[@]}"
-    else
-        mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${sftp_results[@]}"
+        mpv_arguments+=("--shuffle")
     fi
+
+    # Play all remote files
+    mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
 fi
