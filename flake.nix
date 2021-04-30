@@ -28,7 +28,7 @@
               src = self;
               patchPhase = with pkgs; ''
                 substituteInPlace strm \
-                  --replace mpv ${mpv}/bin/mpv
+                  --replace mpv\  ${mpv}/bin/mpv\ 
               '';
               installPhase = ''
                 install -m 755 -D strm $out/bin/strm
