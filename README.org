@@ -107,6 +107,7 @@
      This works for single and mutliple files.
      To listen e.g. to an audiobook in multiple stages you can always use the same command (=strm audiobook=).
      Just make sure you always quit with =Q=.
+     To clear all stored positions remove the directory (=~/.config/mpv/watch_later=).
 
 ** Configuration
 
