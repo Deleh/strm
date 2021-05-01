@@ -1,6 +1,6 @@
 * strm
 
-  *strm* is a small Bash script that lets you stream media files over SSH.
+  *strm* is a small Bash script that lets you stream media files over SSH in a convenient way.
 
   No need for mounting and navigating through complex directory structures anymore.
   Just provide a query and the matching media files are played locally via [[https://mpv.io/][mpv]].
@@ -41,8 +41,8 @@
 
   strm consists mainly of two parts:
 
-  1. Execute =find= via SSH on a remote machine
-  2. Play the matched files with =mpv=
+  1. Execute =find= via SSH on a machine
+  2. Play the matched files with =mpv= over SFTP
 
   The rest is just bells and whistles.
 
@@ -79,7 +79,7 @@
    #+begin_src text
      Usage: strm [OPTIONS] QUERIES ... [OPTIONS]
 
-     Stream media files over SSH.
+     Stream media files over SSH in a convenient way.
 
      OPTIONS
        -h, --help                                 Show this help message
