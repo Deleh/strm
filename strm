@@ -112,11 +112,9 @@ if [ "$media_directories" == "" ]; then
     fi
 fi
 
-# Remove possible whitespace characters from media directories string
-media_directories=${media_directories//[[:blank:]]/}
-
 # Read media directories
 IFS="," read -a media_directories <<< "$media_directories"
+echo "${#media_directories[@]}"
 
 # Construct find argument array
 # Ignore hidden files and directories and list only files and symlinks
@@ -152,7 +150,7 @@ for media_directory in "${media_directories[@]}"; do
 
     # Get search results from remote
     # Look for paths matching given queries in visible directories, listing only filenames and links
-    mapfile -t tmp_results < <(ssh -o ConnectTimeout=10 "$connection_string" find "$directory" "${find_arguments[@]}" | sort)
+    mapfile -t tmp_results < <(ssh -o ConnectTimeout=10 "$connection_string" find "'$directory'" "${find_arguments[@]}" | sort)
 
     # Build SFTP strings and printable strings
     for i in "${!tmp_results[@]}"; do

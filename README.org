@@ -119,6 +119,7 @@
      #   <SSH connection string><absolute_path_to_media_directory>
      #
      # Multiple media directories can be set with a comma (,) as delimiter.
+     # Spaces must be escaped with a backslash (\).
      # Media directories are queried and played in order.
      #
      # Examples:
