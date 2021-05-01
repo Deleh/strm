@@ -7,7 +7,7 @@ text_bold="\e[1m"
 function print_usage {
     echo "Usage: strm [OPTIONS] QUERIES ... [OPTIONS]"
     echo
-    echo "Stream media files over SSH."
+    echo "Stream media files over SSH in a convenient way."
     echo
     echo "OPTIONS"
     echo "  -h, --help                                 Show this help message"
