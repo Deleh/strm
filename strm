@@ -114,7 +114,6 @@ fi
 
 # Read media directories
 IFS="," read -a media_directories <<< "$media_directories"
-echo "${#media_directories[@]}"
 
 # Construct find argument array
 # Ignore hidden files and directories and list only files and symlinks
