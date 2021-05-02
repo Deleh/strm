@@ -16,7 +16,7 @@
         └── ...
   #+end_src
 
-  If strm is configured to use the =media= directory, you can play the shortfilm e.g. with the following command:
+  If *strm* is configured to use the =media= directory, you can play the shortfilm e.g. with the following command:
 
   #+begin_src sh
     strm daily dweebs
@@ -39,7 +39,7 @@
   It is possible that multiple files are matched by one of the commands.
   All files are then played in the order of the configured media directories, followed by lexicographical order of the filepath.
 
-  strm consists mainly of two parts:
+  *strm* consists mainly of two parts:
 
   1. Execute =find= via SSH on a machine
   2. Play the matched files with =mpv= over SFTP
@@ -63,7 +63,7 @@
 
    Make sure, mpv is installed and that you have access to a machine via SSH.
 
-   strm is just a script, you can execute it directly.
+   *strm* is just a script, you can execute it directly.
    Or grab it and place it in your =$PATH=.
 
    This project is also a [[https://nixos.wiki/wiki/Flakes][Nix flake]].
