@@ -51,6 +51,7 @@
    - List remote files by query
    - Play remote files via mpv
    - Query multiple remote directories with one command
+   - Play remote files on other machines (need to have *strm* installed)
 
    You can access your local machine also via SSH, so every occurrence of /remote/ in the list can be replaced with /local/.
 
@@ -84,9 +85,11 @@
      OPTIONS
        -h, --help                                 Show this help message
        -c, --config CONFIG_FILE                   Path to config file (default: ~/.config/strm/strm.config)
+       -f, --fullscreen                           Play video files in fullscreen
        -l, --list                                 List files instead of playing
        -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored
        -o, --or                                   Use a logical OR for queries (default: AND)
+       -r, --remote SSH_CONNECTION_STRING         Execute strm with other given arguments on remote machine (-f is set by default)
        -s, --shuffle                              Play files in random order
 
      EXAMPLES
@@ -101,6 +104,7 @@
    - =LEFT= and =RIGHT= :: Seek backward/forward.
    - =p= and =SPACE= :: Pause (pressing again unpauses).
    - =<= and =>= :: Go backward/forward in the playlist.
+   - =f= :: Toggle fullscreen.
    - =q= :: Stop playing and quit.
    - =Q= :: Like =q=, but store the current playback position.
      Playing the same file later will resume at the old playback position if possible.
@@ -108,6 +112,19 @@
      To listen e.g. to an audiobook in multiple stages you can always use the same command (=strm audiobook=).
      Just make sure you always quit with =Q=.
      To clear all stored positions remove the directory (=~/.config/mpv/watch_later=).
+
+*** The =--remote== flag
+
+   The =--remote= flag executes *strm* on another machine and passes all other arguments to it.
+   For this, *strm* needs to be installed and configured on the remote machine.
+
+   If you pass the =--media-directories= flag it doesn't need to be configured but make sure your arguments are correct from the point of view of the remote machine.
+
+   The =--fullscreen= is inverted when playing on a remote machine.
+   It is set by default and not set if you explicitly pass it.
+
+   The remote =$DISPLAY= variable is set to =:0= by default which should fit most setups.
+   If you wish to change this you have to adjust the script in line 131.
 
 ** Configuration
 
