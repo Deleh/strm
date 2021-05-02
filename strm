@@ -178,6 +178,11 @@ for media_directory in "${media_directories[@]}"; do
     # Get connection string and remote directory
     IFS="/" read -r connection_string directory <<< "$media_directory"
 
+    # Check validity of variables
+    if [ "$connection_string" == "" ] || [ "$directory" == "" ]; then
+	error "Not a valid media directory: $media_directory"
+    fi
+    
     echo -ne "Fetching results from $text_bold$(basename $directory)$text_reset on $text_bold$connection_string$text_reset\n"
     
     # Add leading and trailing slash to directory if missing
