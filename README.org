@@ -119,11 +119,12 @@
    For this, *strm* needs to be installed and configured on the remote machine.
 
    If you pass the =--media-directories= flag it doesn't need to be configured but make sure your arguments are correct from the point of view of the remote machine.
-
-   The =--fullscreen= is inverted when playing on a remote machine.
+   The same hold true if you pass the =--config= flag.
+   
+   =--fullscreen= is inverted when playing on a remote machine.
    It is set by default and not set if you explicitly pass it.
 
-   The remote =$DISPLAY= variable is set to =:0= by default which should fit most setups.
+   On the remote, the =$DISPLAY= variable is set by default to =:0= which should fit most setups.
    If you wish to change this you have to adjust the script in line 131.
 
 ** Configuration
