@@ -61,7 +61,7 @@ while (( "$#" )); do
 		remote_arguments+=("$1" "$2")
 		shift 2
 	    else
-		error "Argument for $1 is missing"
+		error "Argument for '$1' is missing"
 	    fi
             ;;
 	-f|--fullscreen)
@@ -82,7 +82,7 @@ while (( "$#" )); do
 		remote_arguments+=("$1" "$2")
 		shift 2
 	    else
-		error "Argument for $1 is missing"
+		error "Argument for '$1' is missing"
 	    fi
             ;;
 	-o|--or)
@@ -95,7 +95,7 @@ while (( "$#" )); do
 		remote="$2"
 		shift 2
 	    else
-		error "Argument for $1 is missing"
+		error "Argument for '$1' is missing"
 	    fi
             ;;
         -s|--shuffle)
@@ -104,7 +104,7 @@ while (( "$#" )); do
             shift
             ;;
         -*|--*=)
-            error "Unsupported flag $1"
+            error "Unsupported flag: $1"
             ;;
         *)
             queries+=("$1")
