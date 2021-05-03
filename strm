@@ -125,6 +125,11 @@ done
 # Execute strm on remote if argument set
 if [ "$remote" != "" ]; then
 
+    # Check if dependencies are fulfilled on remote
+    if ! ssh "$remote" "command -v mpv strm tmux &>/dev/null"; then
+	error "make sure ${text_bold}$remote${text_reset} is accessible and  mpv, strm and tmux are installed"
+    fi
+
     # Check if strm tmux session is already running
     if ssh "$remote" "tmux has-session -t strm &>/dev/null"; then
 
@@ -135,7 +140,7 @@ if [ "$remote" != "" ]; then
 
 	# Print usage if no queries were given
 	if [ "${#queries[@]}" == 0 ]; then
-	    echo -ne "No strm session running on ${text_bold}$remote${text_reset}, please provide a query"
+	    echo -ne "No strm session running on ${text_bold}$remote${text_reset}, please provide a query\n"
 	    exit
 	fi
 	
@@ -148,7 +153,7 @@ if [ "$remote" != "" ]; then
 	remote_arguments+=("--is-remote-call")
 
 	# Execute strm on remote machine
-	ssh -t "$remote" "DISPLAY=:0 tmux new-session -s strm strm ${remote_arguments[@]} &>/dev/null"
+	ssh -t "$remote" "DISPLAY=:0 tmux new-session -s strm 'tmux set-option status off; strm ${remote_arguments[@]}' &>/dev/null"
     fi
     exit
 fi
@@ -232,10 +237,11 @@ echo
 
 # Exit if no results found
 if [ "${#sftp_results[@]}" == 0 ]; then
-    echo "No files found"
     if [ "$is_remote_call" == true ]; then
-	echo "Press something to quit"
+	echo "No files found, press something to quit"
 	read -n 1
+    else
+	echo "No files found"
     fi
     exit
 fi

@@ -62,6 +62,7 @@
 ** Installation
 
    Make sure, mpv is installed and that you have access to a machine via SSH.
+   If you plan to execute *strm* on a remote machine with the =--remote= flag, install [[https://github.com/tmux/][tmux]] in addition to mpv on the target.
 
    *strm* is just a script, you can execute it directly.
    Or grab it and place it in your =$PATH=.
@@ -115,17 +116,21 @@
 
 *** The =--remote= flag
 
-   The =--remote= flag executes *strm* on another machine and passes all other arguments to it.
+   The =--remote= flag executes *strm* on another machine in a tmux session and passes all other arguments to it.
    For this, *strm* needs to be installed and configured on the remote machine.
+   Launching it in a tmux session allows to detach from the session with =C-b d=.
 
-   If you pass the =--media-directories= flag it doesn't need to be configured but make sure your arguments are correct from the point of view of the remote machine.
+   If a session is already running on the target machine, the session gets attached.
+   Further commands are ignored (it is even sufficient to call =strm -r <remote>=).
+
+   If you pass the =--media-directories= flag, *strm* doesn't need to be configured but make sure your arguments are correct from the point of view of the remote machine.
    The same holds true if you pass the =--config= flag.
    
    =--fullscreen= is inverted when playing on a remote machine.
    It is set by default and not set if you explicitly pass it.
 
    On the remote, the =$DISPLAY= variable is set by default to =:0= which should fit most setups.
-   If you wish to change this you have to adjust the script in line 131.
+   If you wish to change this, search for the line containing =DISPLAY= in the script and adjust it.
 
 ** Configuration
 
