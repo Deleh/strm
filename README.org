@@ -113,13 +113,13 @@
      Just make sure you always quit with =Q=.
      To clear all stored positions remove the directory (=~/.config/mpv/watch_later=).
 
-*** The =--remote== flag
+*** The =--remote= flag
 
    The =--remote= flag executes *strm* on another machine and passes all other arguments to it.
    For this, *strm* needs to be installed and configured on the remote machine.
 
    If you pass the =--media-directories= flag it doesn't need to be configured but make sure your arguments are correct from the point of view of the remote machine.
-   The same hold true if you pass the =--config= flag.
+   The same holds true if you pass the =--config= flag.
    
    =--fullscreen= is inverted when playing on a remote machine.
    It is set by default and not set if you explicitly pass it.
