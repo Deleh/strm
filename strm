@@ -30,20 +30,24 @@ function print_controls {
     echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit, [${text_bold}Q${text_reset}] Save position and quit\n" 
 }
 
+function print_remote_controls {
+    echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit, [${text_bold}Q${text_reset}] Save position and quit, [${text_bold}C-b d${text_reset}] Detach from session\n" 
+}
+
 function error {
     echo -ne "${text_bold}ERROR${text_reset} $1\n" >&2
     exit 1
 }
 
 # Check if mpv is installed
-if ! command -v mpv &>/dev/null
-then
+if ! command -v mpv &>/dev/null; then
     error "mpv was not found, please install it"
 fi
 
 # Set default values
 config="$HOME/.config/strm/strm.config"
 fullscreen=false
+is_remote_call=false
 list=false
 media_directories=""
 or=false
@@ -71,6 +75,10 @@ while (( "$#" )); do
         -h|--help)
             print_usage
             ;;
+	--is-remote-call)
+	    is_remote_call=true
+	    shift
+	    ;;
         -l|--list)
             list=true
 	    remote_arguments+=("$1")
@@ -114,22 +122,40 @@ while (( "$#" )); do
     esac
 done
 
-# Print usage if no queries were given
-if [ "${#queries[@]}" == 0 ]; then
-    print_usage
-fi
-
 # Execute strm on remote if argument set
 if [ "$remote" != "" ]; then
 
-    # Invert fullscreen argument
-    if [ "$fullscreen" == false ]; then
-	remote_arguments+=("-f")
-    fi
+    # Check if strm tmux session is already running
+    if ssh "$remote" "tmux has-session -t strm &>/dev/null"; then
 
-    # Execute strm on remote machine
-    ssh -t "$remote" "DISPLAY=:0 strm ${remote_arguments[@]}; echo"
+	# Attach to tmux session
+	ssh -t "$remote" "tmux attach-session -t strm &>/dev/null"
+
+    else
+
+	# Print usage if no queries were given
+	if [ "${#queries[@]}" == 0 ]; then
+	    echo -ne "No strm session running on ${text_bold}$remote${text_reset}, please provide a query"
+	    exit
+	fi
+	
+	# Invert fullscreen argument
+	if [ "$fullscreen" == false ]; then
+	    remote_arguments+=("-f")
+	fi
+
+	# Notify strm about remote session
+	remote_arguments+=("--is-remote-call")
+
+	# Execute strm on remote machine
+	ssh -t "$remote" "DISPLAY=:0 tmux new-session -s strm strm ${remote_arguments[@]} &>/dev/null"
+    fi
     exit
+fi
+
+# Print usage if no queries were given
+if [ "${#queries[@]}" == 0 ]; then
+    print_usage
 fi
 
 # If no media directory was set load config file
@@ -144,7 +170,7 @@ if [ "$media_directories" == "" ]; then
 
     # Throws error if still no media directory set
     if [ "$media_directories" == "" ]; then
-	error "No media directory specified"
+	error "No media directories specified"
     fi
 fi
 
@@ -207,6 +233,10 @@ echo
 # Exit if no results found
 if [ "${#sftp_results[@]}" == 0 ]; then
     echo "No files found"
+    if [ "$is_remote_call" == true ]; then
+	echo "Press something to quit"
+	read -n 1
+    fi
     exit
 fi
 
@@ -231,7 +261,11 @@ done
 # Play results if --list flag not set
 if [ "$list" == false ]; then
 
-    print_controls
+    if [ "$is_remote_call" == true ]; then
+	print_remote_controls
+    else
+	print_controls
+    fi
 
     # Construct addtitional mpv arguments
     mpv_arguments=()
