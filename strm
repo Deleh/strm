@@ -39,11 +39,6 @@ function error {
     exit 1
 }
 
-# Check if mpv is installed
-if ! command -v mpv &>/dev/null; then
-    error "mpv was not found, please install it"
-fi
-
 # Set default values
 config="$HOME/.config/strm/strm.config"
 fullscreen=false
@@ -156,6 +151,11 @@ if [ "$remote" != "" ]; then
 	ssh -t "$remote" "DISPLAY=:0 tmux new-session -s strm 'tmux set-option status off; strm ${remote_arguments[@]}' &>/dev/null"
     fi
     exit
+fi
+
+# Check if mpv is installed
+if ! command -v mpv &>/dev/null; then
+    error "mpv was not found, please install it"
 fi
 
 # Print usage if no queries were given
