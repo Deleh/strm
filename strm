@@ -126,10 +126,10 @@ if [ "$remote" != "" ]; then
     fi
 
     # Check if strm tmux session is already running
-    if ssh "$remote" "tmux has-session -t strm &>/dev/null"; then
+    if ssh -o ConnectTimeout=10 "$remote" "tmux has-session -t strm &>/dev/null"; then
 
 	# Attach to tmux session
-	ssh -t "$remote" "tmux attach-session -t strm &>/dev/null"
+	ssh -o ConnectTimeout=10 -t "$remote" "tmux attach-session -t strm &>/dev/null"
 
     else
 
@@ -148,7 +148,7 @@ if [ "$remote" != "" ]; then
 	remote_arguments+=("--is-remote-call")
 
 	# Execute strm on remote machine
-	ssh -t "$remote" "DISPLAY=:0 tmux new-session -s strm 'tmux set-option status off; strm ${remote_arguments[@]}' &>/dev/null"
+	ssh -o ConnectTimeout=10 -t "$remote" "DISPLAY=:0 tmux new-session -s strm 'tmux set-option status off; strm ${remote_arguments[@]}' &>/dev/null"
     fi
     exit
 fi
