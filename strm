@@ -168,7 +168,7 @@ if [ "$media_directories" == "" ]; then
 
     # Read config file
     if test -f "$config"; then
-	. "$config"
+	source "$config"
     else
 	error "Config file not found ($config)"
     fi
