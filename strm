@@ -168,7 +168,7 @@ if [ "$media_directories" == "" ]; then
 
     # Read config file
     if test -f "$config"; then
-	. "$config"
+	source "$config"
     else
 	error "Config file not found ($config)"
     fi
@@ -283,5 +283,5 @@ if [ "$list" == false ]; then
     fi
 
     # Play all remote files
-    mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
+    mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/album:}${?metadata/album: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
 fi
