@@ -12,9 +12,11 @@ function print_usage {
     echo "OPTIONS"
     echo "  -h, --help                                 Show this help message"
     echo "  -c, --config CONFIG_FILE                   Path to config file (default: ~/.config/strm/strm.config)"
+    echo "  -d, --resume-directory DIRECTORY           Resume files directory (default: ~/.cache/strm)"
     echo "  -f, --fullscreen                           Play video files in fullscreen"
     echo "  -l, --list                                 List files instead of playing"
     echo "  -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored"
+    echo "  -n, --neat                                 Don't resume playback"
     echo "  -o, --or                                   Use a logical OR for queries (default: AND)"
     echo "  -r, --remote SSH_CONNECTION_STRING         Execute strm with other given arguments on remote machine (-f is set by default)"
     echo "  -s, --shuffle                              Play files in random order"
@@ -45,10 +47,12 @@ fullscreen=false
 is_remote_call=false
 list=false
 media_directories=""
+neat=false
 or=false
 queries=()
 remote=""
 remote_arguments=()
+resume_directory=""
 shuffle=false
 
 # Parse arguments
@@ -57,6 +61,15 @@ while (( "$#" )); do
         -c|--config)
 	    if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
 		config="$2"
+		remote_arguments+=("$1" "$2")
+		shift 2
+	    else
+		error "Argument for '$1' is missing"
+	    fi
+            ;;
+        -d|--resume-directory)
+	    if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+		resume_directory=="$2"
 		remote_arguments+=("$1" "$2")
 		shift 2
 	    else
@@ -88,6 +101,11 @@ while (( "$#" )); do
 		error "Argument for '$1' is missing"
 	    fi
             ;;
+        -n|--neat)
+            neat=true
+	    remote_arguments+=("$1")
+	    shift
+	    ;;
 	-o|--or)
 	    or=true
 	    remote_arguments+=("$1")
@@ -275,11 +293,14 @@ if [ "$list" == false ]; then
 
     # Construct addtitional mpv arguments
     mpv_arguments=()
+    if [ "$fullscreen" == true ]; then
+        mpv_arguments+=("--fullscreen")
+    fi
     if [ "$shuffle" == true ]; then
         mpv_arguments+=("--shuffle")
     fi
-    if [ "$fullscreen" == true ]; then
-        mpv_arguments+=("--fullscreen")
+    if [ "$neat" == true ]; then
+        mpv_arguments+=("--no-resume-playback")
     fi
 
     # Play all remote files
