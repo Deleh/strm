@@ -356,7 +356,7 @@ if [ "$list" == false ]; then
     fi
 
     # Play all remote files
-    mpv --msg-level=all=error,statusline=status --watch-later-directory="$HOME/.cache/strm" --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/album:}${?metadata/album: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
+    mpv --ignore-path-in-watch-later-config --msg-level=all=error,statusline=status --watch-later-directory="$HOME/.cache/strm" --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/album:}${?metadata/album: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
 
     # Synchronize playback directory back if not tidy and directory is set
     if [ "$tidy" == false ] && [ "$playback_directory" != "" ]; then
