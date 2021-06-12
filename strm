@@ -12,14 +12,14 @@ function print_usage {
     echo "OPTIONS"
     echo "  -h, --help                                 Show this help message"
     echo "  -c, --config CONFIG_FILE                   Path to config file (default: ~/.config/strm/strm.config)"
-    echo "  -d, --resume-directory DIRECTORY           Resume files directory (default: ~/.cache/strm)"
     echo "  -f, --fullscreen                           Play video files in fullscreen"
     echo "  -l, --list                                 List files instead of playing"
     echo "  -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored"
-    echo "  -n, --neat                                 Don't resume playback"
     echo "  -o, --or                                   Use a logical OR for queries (default: AND)"
+    echo "  -p, --playback-directory DIRECTORY         Playback files directory"
     echo "  -r, --remote SSH_CONNECTION_STRING         Execute strm with other given arguments on remote machine (-f is set by default)"
     echo "  -s, --shuffle                              Play files in random order"
+    echo "  -t, --tidy                                 Don't resume playback and don't synchronize playback positions"
     echo
     echo "EXAMPLES"
     echo "  strm -l .             # List all available files"
@@ -29,11 +29,11 @@ function print_usage {
 }
 
 function print_controls {
-    echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit, [${text_bold}Q${text_reset}] Save position and quit\n" 
+    echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit\n"
 }
 
 function print_remote_controls {
-    echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit, [${text_bold}Q${text_reset}] Save position and quit, [${text_bold}C-b d${text_reset}] Detach from session\n" 
+    echo -ne "\n[${text_bold}p${text_reset}] Play/Pause, [${text_bold}<${text_reset}/${text_bold}>${text_reset}] Previous/Next, [${text_bold}q${text_reset}] Quit, [${text_bold}C-b d${text_reset}] Detach from session\n"
 }
 
 function error {
@@ -52,76 +52,76 @@ or=false
 queries=()
 remote=""
 remote_arguments=()
-resume_directory=""
+tmp_playback_directory=""
 shuffle=false
 
 # Parse arguments
 while (( "$#" )); do
     case "$1" in
         -c|--config)
-	    if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-		config="$2"
-		remote_arguments+=("$1" "$2")
-		shift 2
-	    else
-		error "Argument for '$1' is missing"
-	    fi
+            if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+                config="$2"
+                remote_arguments+=("$1" "$2")
+                shift 2
+            else
+                error "Argument for '$1' is missing"
+            fi
             ;;
-        -d|--resume-directory)
-	    if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-		resume_directory=="$2"
-		remote_arguments+=("$1" "$2")
-		shift 2
-	    else
-		error "Argument for '$1' is missing"
-	    fi
+        -d|--playback-directory)
+            if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+                tmp_playback_directory="$2"
+                remote_arguments+=("$1" "$2")
+                shift 2
+            else
+                error "Argument for '$1' is missing"
+            fi
             ;;
-	-f|--fullscreen)
-	    fullscreen=true
-	    shift
-	    ;;
+        -f|--fullscreen)
+            fullscreen=true
+            shift
+            ;;
         -h|--help)
             print_usage
             ;;
-	--is-remote-call)
-	    is_remote_call=true
-	    shift
-	    ;;
-        -l|--list)
-            list=true
-	    remote_arguments+=("$1")
+        --is-remote-call)
+            is_remote_call=true
             shift
             ;;
-	-m|--media-directories)
-	    if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-		media_directories="$2"
-		remote_arguments+=("$1" "$2")
-		shift 2
-	    else
-		error "Argument for '$1' is missing"
-	    fi
+        -l|--list)
+            list=true
+            remote_arguments+=("$1")
+            shift
+            ;;
+        -m|--media-directories)
+            if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+                media_directories="$2"
+                remote_arguments+=("$1" "$2")
+                shift 2
+            else
+                error "Argument for '$1' is missing"
+            fi
             ;;
         -n|--neat)
             neat=true
-	    remote_arguments+=("$1")
-	    shift
-	    ;;
-	-o|--or)
-	    or=true
-	    remote_arguments+=("$1")
-	    shift
-	    ;;
-	-r|--remote)
-	    if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-		remote="$2"
-		shift 2
-	    else
-		error "Argument for '$1' is missing"
-	    fi
+            remote_arguments+=("$1")
+            shift
+            ;;
+        -o|--or)
+            or=true
+            remote_arguments+=("$1")
+            shift
+            ;;
+        -r|--remote)
+            if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+                remote="$2"
+                shift 2
+            else
+                error "Argument for '$1' is missing"
+            fi
             ;;
         -s|--shuffle)
             shuffle=true
-	    remote_arguments+=("$1")
+            remote_arguments+=("$1")
             shift
             ;;
         -*|--*=)
@@ -129,7 +129,7 @@ while (( "$#" )); do
             ;;
         *)
             queries+=("$1")
-	    remote_arguments+=("$1")
+            remote_arguments+=("$1")
             shift
             ;;
     esac
@@ -140,33 +140,33 @@ if [ "$remote" != "" ]; then
 
     # Check if dependencies are fulfilled on remote
     if ! ssh "$remote" "command -v mpv strm tmux &>/dev/null"; then
-	error "make sure ${text_bold}$remote${text_reset} is accessible and  mpv, strm and tmux are installed"
+        error "make sure ${text_bold}$remote${text_reset} is accessible and  mpv, strm and tmux are installed"
     fi
 
     # Check if strm tmux session is already running
     if ssh -o ConnectTimeout=10 "$remote" "tmux has-session -t strm &>/dev/null"; then
 
-	# Attach to tmux session
-	ssh -o ConnectTimeout=10 -t "$remote" "tmux attach-session -t strm &>/dev/null"
+        # Attach to tmux session
+        ssh -o ConnectTimeout=10 -t "$remote" "tmux attach-session -t strm &>/dev/null"
 
     else
 
-	# Print usage if no queries were given
-	if [ "${#queries[@]}" == 0 ]; then
-	    echo -ne "No strm session running on ${text_bold}$remote${text_reset}, please provide a query\n"
-	    exit
-	fi
-	
-	# Invert fullscreen argument
-	if [ "$fullscreen" == false ]; then
-	    remote_arguments+=("-f")
-	fi
+        # Print usage if no queries were given
+        if [ "${#queries[@]}" == 0 ]; then
+            echo -ne "No strm session running on ${text_bold}$remote${text_reset}, please provide a query\n"
+            exit
+        fi
 
-	# Notify strm about remote session
-	remote_arguments+=("--is-remote-call")
+        # Invert fullscreen argument
+        if [ "$fullscreen" == false ]; then
+            remote_arguments+=("-f")
+        fi
 
-	# Execute strm on remote machine
-	ssh -o ConnectTimeout=10 -t "$remote" "DISPLAY=:0 tmux new-session -s strm 'tmux set-option status off; strm ${remote_arguments[@]}' &>/dev/null"
+        # Notify strm about remote session
+        remote_arguments+=("--is-remote-call")
+
+        # Execute strm on remote machine
+        ssh -o ConnectTimeout=10 -t "$remote" "DISPLAY=:0 tmux new-session -s strm 'tmux set-option status off; strm ${remote_arguments[@]}' &>/dev/null"
     fi
     exit
 fi
@@ -186,15 +186,20 @@ if [ "$media_directories" == "" ]; then
 
     # Read config file
     if test -f "$config"; then
-	source "$config"
+        source "$config"
     else
-	error "Config file not found ($config)"
+        error "Config file not found ($config)"
     fi
 
     # Throws error if still no media directory set
     if [ "$media_directories" == "" ]; then
-	error "No media directories specified"
+        error "No media directories specified"
     fi
+fi
+
+# Override playback_directory if argument set
+if [ "$tmp_playback_directory" != "" ]; then
+    playback_directory="$tmp_playback_directory"
 fi
 
 # Read media directories
@@ -229,11 +234,11 @@ for media_directory in "${media_directories[@]}"; do
 
     # Check validity of variables
     if [ "$connection_string" == "" ] || [ "$directory" == "" ]; then
-	error "Not a valid media directory: $media_directory"
+        error "Not a valid media directory: $media_directory"
     fi
-    
+
     echo -ne "Fetching results from $text_bold$(basename $directory)$text_reset on $text_bold$connection_string$text_reset\n"
-    
+
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
 
@@ -244,8 +249,8 @@ for media_directory in "${media_directories[@]}"; do
     # Build SFTP strings and printable strings
     for i in "${!tmp_results[@]}"; do
         tmp_sftp_results["$i"]="sftp://$connection_string${tmp_results[$i]}"
-	tmp_print_result="$text_bold$connection_string$text_reset ${tmp_results[$i]}"
-	tmp_print_results["$i"]="${tmp_print_result/$directory/}"
+        tmp_print_result="$text_bold$connection_string$text_reset ${tmp_results[$i]}"
+        tmp_print_results["$i"]="${tmp_print_result/$directory/}"
     done
     sftp_results=("${sftp_results[@]}" "${tmp_sftp_results[@]}")
     print_results=("${print_results[@]}" "${tmp_print_results[@]}")
@@ -256,10 +261,10 @@ echo
 # Exit if no results found
 if [ "${#sftp_results[@]}" == 0 ]; then
     if [ "$is_remote_call" == true ]; then
-	echo "No files found, press something to quit"
-	read -n 1
+        echo "No files found, press something to quit"
+        read -n 1
     else
-	echo "No files found"
+        echo "No files found"
     fi
     exit
 fi
@@ -285,10 +290,11 @@ done
 # Play results if --list flag not set
 if [ "$list" == false ]; then
 
+    # Print controls
     if [ "$is_remote_call" == true ]; then
-	print_remote_controls
+        print_remote_controls
     else
-	print_controls
+        print_controls
     fi
 
     # Construct addtitional mpv arguments
@@ -301,8 +307,39 @@ if [ "$list" == false ]; then
     fi
     if [ "$neat" == true ]; then
         mpv_arguments+=("--no-resume-playback")
+    elif [ "$playback_directory" != "" ]; then
+
+        # Make local playback directory if not existent
+        mkdir -p "$HOME/.cache/strm"
+
+        # Get connection string and remote directory
+        IFS="/" read -r connection_string directory <<< "$playback_directory"
+
+        # Add leading and trailing slash to directory if missing
+        [[ "$directory" != /*/ ]] && directory="/$directory/"
+
+        # Correct empty connection string
+        if [ "$connection_string" == "" ]; then
+            connection_string="localhost"
+        fi
+
+        # Make remote directory if not existent
+        ssh -o ConnectTimeout=10 "$connection_string" "mkdir -p $directory"
+
+        # Synchronize remote to local
+        rsync -az --delete "$connection_string:$directory" "$HOME/.cache/strm/"
+
+        # Add mpv argument
+        mpv_arguments+=("--save-position-on-quit")
+
     fi
 
     # Play all remote files
-    mpv --msg-level=all=error,statusline=status --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/album:}${?metadata/album: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
+    mpv --msg-level=all=error,statusline=status --watch-later-directory="$HOME/.cache/strm" --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/album:}${?metadata/album: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
+
+    # Synchronize playback directory back if not neat and directory is set
+    if [ "$neat" == false ] && [ "$playback_directory" != "" ]; then
+        rsync -az --delete "$HOME/.cache/strm/" "$connection_string:$directory"
+    fi
+
 fi

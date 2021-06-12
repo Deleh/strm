@@ -22,7 +22,7 @@
     strm daily dweebs
   #+end_src
 
-  Every argument which is not assigned to a flag is interpreted as part of the query.
+  Every argument which is not assigned to an flag is interpreted as part of the query.
   The query arguments are interpreted as [[https://en.wikipedia.org/wiki/Glob_(programming)][glob patterns]], additionally surrounded by wildcards (=*=).
   If every pattern matches any filepath in the configured media directories, the matched filepaths are interpreted as result.
   The =--or= flag can be set to get results which match at least one pattern.
@@ -51,13 +51,10 @@
    - List remote files by query
    - Play remote files via mpv
    - Query multiple remote directories with one command
-   - Play remote files on other machines (need to have *strm* installed)
-
+   - Play remote files on other machines
+   - Synchronize playback positions with remote machines
+     
    You can access your local machine also via SSH, so every occurrence of /remote/ in the list can be replaced with /local/.
-
-   mpv has a nice feature which lets you resume playback.
-   This is handy if you want to e.g. continue watching you favourite series at a later point in time.
-   Check the *usage* below to see how this works.
 
 ** Dependencies
 
@@ -98,8 +95,10 @@
        -l, --list                                 List files instead of playing
        -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored
        -o, --or                                   Use a logical OR for queries (default: AND)
+       -p, --playback-directory DIRECTORY         Playback files directory
        -r, --remote SSH_CONNECTION_STRING         Execute strm with other given arguments on remote machine (-f is set by default)
        -s, --shuffle                              Play files in random order
+       -t, --tidy                                 Don't resume playback and don't synchronize playback positions
 
      EXAMPLES
        strm -l .             # List all available files
@@ -115,12 +114,8 @@
    - =<= and =>= :: Go backward/forward in the playlist.
    - =f= :: Toggle fullscreen.
    - =q= :: Stop playing and quit.
-   - =Q= :: Like =q=, but store the current playback position.
-     Playing the same file later will resume at the old playback position if possible.
-     This works for single and mutliple files.
-     To listen e.g. to an audiobook in multiple stages you can always use the same command (=strm audiobook=).
-     Just make sure you always quit with =Q=.
-     To clear all stored positions remove the directory (=~/.config/mpv/watch_later=).
+     If the =playback_directory= is configured or the =--playback-directory= argument ist set, the playback position of the current file is saved on exit and synchronized with the given directory.
+     Otherwise (or if the =--neat= flag is set) the playback position is not saved on exit and nothing is synchronized.
 
 *** The =--remote= flag
 
@@ -155,11 +150,27 @@
      #   remote-machine/home/bob/music
      #   bob@another-machine/media/movies,bob@10.0.0.1/home/bob/series
      media_directories=""
-   #+end_src
 
+     # Directory with which the saved playback positions are synchronized on exit of the following form:
+     #
+     #   <SSH connection string><absolute_path_to_media_directory>
+     #
+     # If it is not set, the mpv resume playback functionality is not enabled by default.
+     #
+     # Examples:
+     #   localhost/home/bob/.strm
+     #   remote-machine/home/bob/strm
+     #   bob@another-machine/home/bob/strm
+     playback_directory=""
+   #+end_src
+   
    An example configuration file can be found in the repository.
    
    The default path of the configuration is =$HOME/.config/strm/strm.config=.
    You can use the =--config= flag to set another configuration file.
    
-   The flag =--media-directories= is used in favour of a configuration file and can be used with the same syntax as described above.
+   The flags =--media-directories= and =--playback-directory= are used in favour of configuration parameters and can be used with the same syntax as described above.
+   Be aware that if the =--media-directories= flag is given, no configuraion file is loaded (even if explicitly set with =--config=) and thus the configured =playback_directory= is not used.
+   In this case use additionally the =--playback-directory= flag with the same value from your config file.
+
+   The local directory to which and from which the playback positions are synchronized is =$HOME/.cache/strm=.
