@@ -225,8 +225,9 @@ fi
 # Check queries
 if [ "${#queries[@]}" == 0 ]; then
     if [ "$playback_directory" != "" ] && test -f "$HOME/.cache/strm/strm_later" && [ "$tidy" == false ]; then
-        queries="$(<$HOME/.cache/strm/strm_later)"
-        IFS=" " read -a queries <<< "$queries"
+        source "$HOME/.cache/strm/strm_later"
+        #IFS=" " read -a queries <<< "$queries"
+        echo "${queries[@]}"
     else
         print_usage
     fi
@@ -326,7 +327,12 @@ done
 if [ "$list" == false ]; then
 
     # Save arguments for later call
-    echo "${queries[@]}" > "$HOME/.cache/strm/strm_later"
+    if [ "$tidy" == false ] && [ "$playback_directory" != "" ]; then
+        echo "queries=(${queries[@]})" > "$HOME/.cache/strm/strm_later"
+        echo "fullscreen=$fullscreen" >> "$HOME/.cache/strm/strm_later"
+        echo "or=$or" >> "$HOME/.cache/strm/strm_later"
+        echo "shuffle=$shuffle" >> "$HOME/.cache/strm/strm_later"
+    fi
     
     # Print controls
     if [ "$is_remote_call" == true ]; then

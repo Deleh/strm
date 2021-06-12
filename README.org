@@ -119,7 +119,6 @@
 
    The last query arguments are saved if a =playback_directory= is set and neither the =--list= or =--tidy= flags are set.
    If you wan't to resume playback at a later time, it is sufficient to call =strm= without arguments.
-   Non-query parameters, such as =--shuffle= or =--or= must still be provided.
 
 *** The =--remote= flag
 
