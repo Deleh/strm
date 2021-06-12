@@ -26,9 +26,10 @@
             pkgs.stdenv.mkDerivation {
               name = "strm";
               src = self;
-              propagatedBuildInputs = [
-                mpv
-              ];
+              patchPhase = with pkgs; ''
+                substituteInPlace strm \
+                  --replace mpv\  ${mpv}/bin/mpv\ 
+              '';
               installPhase = ''
                 install -m 755 -D strm $out/bin/strm
               '';
