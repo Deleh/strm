@@ -122,6 +122,8 @@
 
    Resuming playback over multiple machines is only possible of all machines are configured with the same =media_directory= path for a file.
    This is due to the fact that mpv stores the playback positions based on the filename hash, which in the case of remote files is the entire file path.
+   If you have a decentralized media library, one solution to resume playback everywhere is to use additional hostnames, such as (=strm-audio= or =strm-video=).
+   Then set the IP addresses on every machine accordingly.
    
 *** The =--remote= flag
 
