@@ -232,8 +232,13 @@ for media_directory in "${media_directories[@]}"; do
     # Get connection string and remote directory
     IFS="/" read -r connection_string directory <<< "$media_directory"
 
-    # Check validity of variables
-    if [ "$connection_string" == "" ] || [ "$directory" == "" ]; then
+    # Correct empty connection string
+    if [ "$connection_string" == "" ]; then
+        connection_string="localhost"
+    fi
+
+    # Check validity of directory
+    if [ "$directory" == "" ]; then
         error "Not a valid media directory: $media_directory"
     fi
 
