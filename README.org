@@ -144,9 +144,10 @@
      # Multiple media directories can be set with a comma (,) as delimiter.
      # Spaces must be escaped with a backslash (\).
      # Media directories are queried and played in order.
+     # If <SSH connection string> is not set, 'localhost' is used.
      #
      # Examples:
-     #   localhost/home/bob/videos
+     #   /home/bob/videos
      #   remote-machine/home/bob/music
      #   bob@another-machine/media/movies,bob@10.0.0.1/home/bob/series
      media_directories=""
@@ -156,9 +157,10 @@
      #   <SSH connection string><absolute_path_to_media_directory>
      #
      # If it is not set, the mpv resume playback functionality is not enabled by default.
+     # If <SSH connection string> is not set, 'localhost' is used.
      #
      # Examples:
-     #   localhost/home/bob/.strm
+     #   /home/bob/.strm
      #   remote-machine/home/bob/strm
      #   bob@another-machine/home/bob/strm
      playback_directory=""
