@@ -118,8 +118,11 @@
      Otherwise (or if the =--tidy= flag is set) the playback position is not saved on exit and nothing is synchronized.
 
    The last query arguments are saved if a =playback_directory= is set and neither the =--list= or =--tidy= flags are set.
-   If you wan't to resume playback at a later time, it is sufficient to call =strm= without arguments.
+   If you want to resume playback at a later time, it is sufficient to call =strm= without arguments.
 
+   Resuming playback over multiple machines is only possible of all machines are configured with the same =media_directory= path for a file.
+   This is due to the fact that mpv stores the playback positions based on the filename hash, which in the case of remote files is the entire file path.
+   
 *** The =--remote= flag
 
    The =--remote= flag executes *strm* on another machine in a tmux session and passes all other given arguments to it.
