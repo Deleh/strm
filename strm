@@ -217,7 +217,7 @@ if [ "$list" == false ] &&  [ "$playback_directory" != "" ] && [ "$tidy" == fals
     ssh -o ConnectTimeout=10 "$connection_string" "mkdir -p $directory"
 
     rsync_directory="$connection_string:$directory"
-    
+
     # Synchronize remote to local
     rsync -az --delete "$rsync_directory" "$HOME/.cache/strm/"
 fi
@@ -333,7 +333,7 @@ if [ "$list" == false ]; then
         echo "or=$or" >> "$HOME/.cache/strm/strm_later"
         echo "shuffle=$shuffle" >> "$HOME/.cache/strm/strm_later"
     fi
-    
+
     # Print controls
     if [ "$is_remote_call" == true ]; then
         print_remote_controls
