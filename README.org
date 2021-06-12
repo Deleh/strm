@@ -114,8 +114,12 @@
    - =<= and =>= :: Go backward/forward in the playlist.
    - =f= :: Toggle fullscreen.
    - =q= :: Stop playing and quit.
-     If the =playback_directory= is configured or the =--playback-directory= argument ist set, the playback position of the current file is saved on exit and synchronized with the given directory.
-     Otherwise (or if the =--neat= flag is set) the playback position is not saved on exit and nothing is synchronized.
+     If the =playback_directory= is configured (or the =--playback-directory= argument ist set), the playback position of the current file is saved on exit and synchronized with the given directory.
+     Otherwise (or if the =--tidy= flag is set) the playback position is not saved on exit and nothing is synchronized.
+
+   The last query arguments are saved if a =playback_directory= is set and neither the =--list= or =--tidy= flags are set.
+   If you wan't to resume playback at a later time, it is sufficient to call =strm= without arguments.
+   Non-query parameters, such as =--shuffle= or =--or= must still be provided.
 
 *** The =--remote= flag
 

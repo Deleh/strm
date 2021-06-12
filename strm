@@ -47,7 +47,7 @@ fullscreen=false
 is_remote_call=false
 list=false
 media_directories=""
-neat=false
+tidy=false
 or=false
 queries=()
 remote=""
@@ -101,11 +101,6 @@ while (( "$#" )); do
                 error "Argument for '$1' is missing"
             fi
             ;;
-        -n|--neat)
-            neat=true
-            remote_arguments+=("$1")
-            shift
-            ;;
         -o|--or)
             or=true
             remote_arguments+=("$1")
@@ -121,6 +116,11 @@ while (( "$#" )); do
             ;;
         -s|--shuffle)
             shuffle=true
+            remote_arguments+=("$1")
+            shift
+            ;;
+        -t|--tidy)
+            tidy=true
             remote_arguments+=("$1")
             shift
             ;;
@@ -151,12 +151,6 @@ if [ "$remote" != "" ]; then
 
     else
 
-        # Print usage if no queries were given
-        if [ "${#queries[@]}" == 0 ]; then
-            echo -ne "No strm session running on ${text_bold}$remote${text_reset}, please provide a query\n"
-            exit
-        fi
-
         # Invert fullscreen argument
         if [ "$fullscreen" == false ]; then
             remote_arguments+=("-f")
@@ -174,11 +168,6 @@ fi
 # Check if mpv is installed
 if ! command -v mpv &>/dev/null; then
     error "mpv was not found, please install it"
-fi
-
-# Print usage if no queries were given
-if [ "${#queries[@]}" == 0 ]; then
-    print_usage
 fi
 
 # If no media directory was set load config file
@@ -200,6 +189,47 @@ fi
 # Override playback_directory if argument set
 if [ "$tmp_playback_directory" != "" ]; then
     playback_directory="$tmp_playback_directory"
+fi
+
+# Synchronize playback directory
+if [ "$list" == false ] &&  [ "$playback_directory" != "" ] && [ "$tidy" == false ]; then
+
+    # Make local playback directory if not existent
+    mkdir -p "$HOME/.cache/strm"
+
+    # Get connection string and remote directory
+    IFS="/" read -r connection_string directory <<< "$playback_directory"
+
+    # Correct empty connection string
+    if [ "$connection_string" == "" ]; then
+        connection_string="localhost"
+    fi
+
+    # Check validity of directory
+    if [ "$directory" == "" ]; then
+        error "Not a valid playback directory ($playback_directory)"
+    fi
+
+    # Add leading and trailing slash to directory if missing
+    [[ "$directory" != /*/ ]] && directory="/$directory/"
+
+    # Make remote directory if not existent
+    ssh -o ConnectTimeout=10 "$connection_string" "mkdir -p $directory"
+
+    rsync_directory="$connection_string:$directory"
+    
+    # Synchronize remote to local
+    rsync -az --delete "$rsync_directory" "$HOME/.cache/strm/"
+fi
+
+# Check queries
+if [ "${#queries[@]}" == 0 ]; then
+    if [ "$playback_directory" != "" ] && test -f "$HOME/.cache/strm/strm_later" && [ "$tidy" == false ]; then
+        queries="$(<$HOME/.cache/strm/strm_later)"
+        IFS=" " read -a queries <<< "$queries"
+    else
+        print_usage
+    fi
 fi
 
 # Read media directories
@@ -239,7 +269,7 @@ for media_directory in "${media_directories[@]}"; do
 
     # Check validity of directory
     if [ "$directory" == "" ]; then
-        error "Not a valid media directory: $media_directory"
+        error "Not a valid media directory ($media_directory)"
     fi
 
     echo -ne "Fetching results from $text_bold$(basename $directory)$text_reset on $text_bold$connection_string$text_reset\n"
@@ -295,6 +325,9 @@ done
 # Play results if --list flag not set
 if [ "$list" == false ]; then
 
+    # Save arguments for later call
+    echo "${queries[@]}" > "$HOME/.cache/strm/strm_later"
+    
     # Print controls
     if [ "$is_remote_call" == true ]; then
         print_remote_controls
@@ -310,41 +343,18 @@ if [ "$list" == false ]; then
     if [ "$shuffle" == true ]; then
         mpv_arguments+=("--shuffle")
     fi
-    if [ "$neat" == true ]; then
+    if [ "$tidy" == true ]; then
         mpv_arguments+=("--no-resume-playback")
     elif [ "$playback_directory" != "" ]; then
-
-        # Make local playback directory if not existent
-        mkdir -p "$HOME/.cache/strm"
-
-        # Get connection string and remote directory
-        IFS="/" read -r connection_string directory <<< "$playback_directory"
-
-        # Add leading and trailing slash to directory if missing
-        [[ "$directory" != /*/ ]] && directory="/$directory/"
-
-        # Correct empty connection string
-        if [ "$connection_string" == "" ]; then
-            connection_string="localhost"
-        fi
-
-        # Make remote directory if not existent
-        ssh -o ConnectTimeout=10 "$connection_string" "mkdir -p $directory"
-
-        # Synchronize remote to local
-        rsync -az --delete "$connection_string:$directory" "$HOME/.cache/strm/"
-
-        # Add mpv argument
         mpv_arguments+=("--save-position-on-quit")
-
     fi
 
     # Play all remote files
     mpv --msg-level=all=error,statusline=status --watch-later-directory="$HOME/.cache/strm" --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/album:}${?metadata/album: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
 
-    # Synchronize playback directory back if not neat and directory is set
-    if [ "$neat" == false ] && [ "$playback_directory" != "" ]; then
-        rsync -az --delete "$HOME/.cache/strm/" "$connection_string:$directory"
+    # Synchronize playback directory back if not tidy and directory is set
+    if [ "$tidy" == false ] && [ "$playback_directory" != "" ]; then
+        rsync -az --delete "$HOME/.cache/strm/" "$rsync_directory"
     fi
 
 fi
