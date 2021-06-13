@@ -53,6 +53,7 @@
    - Query multiple remote directories with one command
    - Play remote files on other machines
    - Synchronize playback positions with remote machines
+   - Sleeptimer
      
    You can access your local machine also via SSH, so every occurrence of /remote/ in the list can be replaced with /local/.
 
@@ -96,6 +97,7 @@
        -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored
        -o, --or                                   Use a logical OR for queries (default: AND)
        -p, --playback-directory DIRECTORY         Playback files directory
+       -q, --quit TIME_IN_MINUTES                 Quit after a given time
        -r, --remote SSH_CONNECTION_STRING         Execute strm with other given arguments on remote machine (-f is set by default)
        -s, --shuffle                              Play files in random order
        -t, --tidy                                 Don't resume playback and don't synchronize playback positions
