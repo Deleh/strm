@@ -67,6 +67,8 @@
    - The machine shall serve as controller :: An SSH client must be installed and *strm* must be executable.
 
    A machine can be used for multiple purposes, make sure all required dependencies are fulfilled.
+
+   If the =playback_directory= is set, [[https://rsync.samba.org/][rsync]] is used to synchronize it with a local directory.
    
 ** Installation
 
@@ -162,10 +164,11 @@
      #   bob@another-machine/media/movies,bob@10.0.0.1/home/bob/series
      media_directories=""
 
-     # Directory with which the saved playback positions are synchronized on exit of the following form:
+     # Directory which contains the saved playback positions of the following form:
      #
      #   <SSH connection string><absolute_path_to_media_directory>
      #
+     # It is synchronized with the local ~/.cache/strm directory before and after playing files.
      # If it is not set, the mpv resume playback functionality is not enabled by default.
      # If <SSH connection string> is not set, 'localhost' is used.
      #

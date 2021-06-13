@@ -205,8 +205,10 @@ fi
 # Synchronize playback directory
 if [ "$list" == false ] &&  [ "$playback_directory" != "" ]; then
 
-    # Make local playback directory if not existent
-    mkdir -p "$HOME/.cache/strm"
+    # Check if rsync is installed
+    if ! command -v rsync &>/dev/null; then
+        error "rsync was not found, please install it"
+    fi
 
     # Get connection string and remote directory
     IFS="/" read -r connection_string directory <<< "$playback_directory"
@@ -216,15 +218,18 @@ if [ "$list" == false ] &&  [ "$playback_directory" != "" ]; then
         connection_string="localhost"
     fi
 
-    echo -ne "Synchronizing playback directory with $text_bold$(basename $connection_string)$text_reset\n"
-
     # Check validity of directory
     if [ "$directory" == "" ]; then
         error "Not a valid playback directory ($playback_directory)"
     fi
 
+    # Make local playback directory if not existent
+    mkdir -p "$HOME/.cache/strm"
+
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
+
+    echo -ne "Synchronizing playback directory with $text_bold$(basename $connection_string)$text_reset\n"
 
     # Make remote directory if not existent
     ssh -o ConnectTimeout=10 "$connection_string" "mkdir -p $directory"
@@ -282,10 +287,10 @@ for media_directory in "${media_directories[@]}"; do
         error "Not a valid media directory ($media_directory)"
     fi
 
-    echo -ne "Fetching results from $text_bold$(basename $directory)$text_reset on $text_bold$connection_string$text_reset\n"
-
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
+
+    echo -ne "Fetching results from $text_bold$(basename $directory)$text_reset on $text_bold$connection_string$text_reset\n"
 
     # Get search results from remote
     # Look for paths matching given queries in visible directories, listing only filenames and links
@@ -387,10 +392,10 @@ if [ "$list" == false ]; then
             connection_string="localhost"
         fi
 
-        echo -ne "\nSynchronizing playback directory with $text_bold$(basename $connection_string)$text_reset"
-
         # Add leading and trailing slash to directory if missing
         [[ "$directory" != /*/ ]] && directory="/$directory/"
+
+        echo -ne "\nSynchronizing playback directory with $text_bold$(basename $connection_string)$text_reset"
 
         # Synchronize local to remote
         rsync -az --delete "$HOME/.cache/strm/" "$connection_string:$directory"
