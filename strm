@@ -216,6 +216,8 @@ if [ "$list" == false ] &&  [ "$playback_directory" != "" ] && [ "$tidy" == fals
         connection_string="localhost"
     fi
 
+    echo -ne "Synchronizing playback directory with $text_bold$(basename $connection_string)$text_reset\n"
+
     # Check validity of directory
     if [ "$directory" == "" ]; then
         error "Not a valid playback directory ($playback_directory)"
@@ -227,18 +229,14 @@ if [ "$list" == false ] &&  [ "$playback_directory" != "" ] && [ "$tidy" == fals
     # Make remote directory if not existent
     ssh -o ConnectTimeout=10 "$connection_string" "mkdir -p $directory"
 
-    rsync_directory="$connection_string:$directory"
-
     # Synchronize remote to local
-    rsync -az --delete "$rsync_directory" "$HOME/.cache/strm/"
+    rsync -az --delete "$connection_string:$directory" "$HOME/.cache/strm/"
 fi
 
 # Check queries
 if [ "${#queries[@]}" == 0 ]; then
     if [ "$playback_directory" != "" ] && test -f "$HOME/.cache/strm/strm_later" && [ "$tidy" == false ]; then
         source "$HOME/.cache/strm/strm_later"
-        #IFS=" " read -a queries <<< "$queries"
-        echo "${queries[@]}"
     else
         print_usage
     fi
@@ -379,7 +377,22 @@ if [ "$list" == false ]; then
 
     # Synchronize playback directory back if not tidy and directory is set
     if [ "$tidy" == false ] && [ "$playback_directory" != "" ]; then
-        rsync -az --delete "$HOME/.cache/strm/" "$rsync_directory"
+
+        # Get connection string and remote directory
+        IFS="/" read -r connection_string directory <<< "$playback_directory"
+
+        # Correct empty connection string
+        if [ "$connection_string" == "" ]; then
+            connection_string="localhost"
+        fi
+
+        echo -ne "\nSynchronizing playback directory with $text_bold$(basename $connection_string)$text_reset"
+
+        # Add leading and trailing slash to directory if missing
+        [[ "$directory" != /*/ ]] && directory="/$directory/"
+
+        # Synchronize local to remote
+        rsync -az --delete "$HOME/.cache/strm/" "$connection_string:$directory"
     fi
 
 fi
