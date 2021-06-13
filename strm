@@ -20,7 +20,7 @@ function print_usage {
     echo "  -q, --quit TIME_IN_MINUTES                 Quit after a given time"
     echo "  -r, --remote SSH_CONNECTION_STRING         Execute strm with other given arguments on remote machine (-f is set by default)"
     echo "  -s, --shuffle                              Play files in random order"
-    echo "  -t, --tidy                                 Don't resume playback and don't synchronize playback positions"
+    echo "  -t, --tidy                                 Don't resume playback"
     echo
     echo "EXAMPLES"
     echo "  strm -l .             # List all available files"
@@ -69,15 +69,6 @@ while (( "$#" )); do
                 error "Argument for '$1' is missing"
             fi
             ;;
-        -d|--playback-directory)
-            if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-                tmp_playback_directory="$2"
-                remote_arguments+=("$1" "$2")
-                shift 2
-            else
-                error "Argument for '$1' is missing"
-            fi
-            ;;
         -f|--fullscreen)
             fullscreen=true
             shift
@@ -107,6 +98,15 @@ while (( "$#" )); do
             or=true
             remote_arguments+=("$1")
             shift
+            ;;
+        -p|--playback-directory)
+            if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+                tmp_playback_directory="$2"
+                remote_arguments+=("$1" "$2")
+                shift 2
+            else
+                error "Argument for '$1' is missing"
+            fi
             ;;
         -q|--quit)
             if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
@@ -203,7 +203,7 @@ if [ "$tmp_playback_directory" != "" ]; then
 fi
 
 # Synchronize playback directory
-if [ "$list" == false ] &&  [ "$playback_directory" != "" ] && [ "$tidy" == false ]; then
+if [ "$list" == false ] &&  [ "$playback_directory" != "" ]; then
 
     # Make local playback directory if not existent
     mkdir -p "$HOME/.cache/strm"
@@ -235,7 +235,7 @@ fi
 
 # Check queries
 if [ "${#queries[@]}" == 0 ]; then
-    if [ "$playback_directory" != "" ] && test -f "$HOME/.cache/strm/strm_later" && [ "$tidy" == false ]; then
+    if [ "$playback_directory" != "" ] && test -f "$HOME/.cache/strm/strm_later"; then
         source "$HOME/.cache/strm/strm_later"
     else
         print_usage
@@ -336,7 +336,7 @@ done
 if [ "$list" == false ]; then
 
     # Save arguments for later call
-    if [ "$tidy" == false ] && [ "$playback_directory" != "" ]; then
+    if [ "$playback_directory" != "" ]; then
         echo "queries=(${queries[@]})" > "$HOME/.cache/strm/strm_later"
         echo "fullscreen=$fullscreen" >> "$HOME/.cache/strm/strm_later"
         echo "or=$or" >> "$HOME/.cache/strm/strm_later"
@@ -360,7 +360,8 @@ if [ "$list" == false ]; then
     fi
     if [ "$tidy" == true ]; then
         mpv_arguments+=("--no-resume-playback")
-    elif [ "$playback_directory" != "" ]; then
+    fi
+    if [ "$playback_directory" != "" ]; then
         mpv_arguments+=("--save-position-on-quit")
     fi
 
@@ -376,7 +377,7 @@ if [ "$list" == false ]; then
     fi
 
     # Synchronize playback directory back if not tidy and directory is set
-    if [ "$tidy" == false ] && [ "$playback_directory" != "" ]; then
+    if [ "$playback_directory" != "" ]; then
 
         # Get connection string and remote directory
         IFS="/" read -r connection_string directory <<< "$playback_directory"
