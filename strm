@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Text formatting variables
-text_reset="\e[0m"
 text_bold="\e[1m"
+text_reset="\e[0m"
 
 function print_usage {
     echo "Usage: strm [OPTIONS] QUERIES ... [OPTIONS]"
@@ -13,6 +13,7 @@ function print_usage {
     echo "  -h, --help                                 Show this help message"
     echo "  -c, --config CONFIG_FILE                   Path to config file (default: ~/.config/strm/strm.config)"
     echo "  -f, --fullscreen                           Play video files in fullscreen"
+    echo "  -i, --ignore-files IGNORE_FILES            Ignore given filenames"
     echo "  -l, --list                                 List files instead of playing"
     echo "  -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored"
     echo "  -o, --or                                   Use a logical OR for queries (default: AND)"
@@ -54,6 +55,7 @@ queries=()
 quit=""
 remote=""
 remote_arguments=()
+tmp_ignore_files=""
 tmp_playback_directory=""
 shuffle=false
 
@@ -75,6 +77,15 @@ while (( "$#" )); do
             ;;
         -h|--help)
             print_usage
+            ;;
+        -i|--ignore-files)
+            if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+                tmp_ignore_files="$2"
+                remote_arguments+=("$1" "$2")
+                shift 2
+            else
+                error "Argument for '$1' is missing"
+            fi
             ;;
         --is-remote-call)
             is_remote_call=true
@@ -202,6 +213,11 @@ if [ "$tmp_playback_directory" != "" ]; then
     playback_directory="$tmp_playback_directory"
 fi
 
+# Override ignore files if argument set
+if [ "$tmp_ignore_files" != "" ]; then
+    ignore_files="$tmp_ignore_files"
+fi
+
 # Synchronize playback directory
 if [ "$list" == false ] &&  [ "$playback_directory" != "" ]; then
 
@@ -250,19 +266,42 @@ fi
 # Read media directories
 IFS="," read -a media_directories <<< "$media_directories"
 
+# Read ignore files
+IFS="," read -a ignore_files <<< "$ignore_files"
+
 # Construct find argument array
-# Ignore hidden files and directories and list only files and symlinks
-find_arguments=("-not" "-path" "'*/\.*'" "-type" "f,l")
+
+# List only files and symlinks
+find_arguments=("-type" "f,l")
+
+# Ignore hidden files and directories
+find_arguments+=("!" "-path" "'*/\.*'")
+
+# Ignore additional given filenames case-insensitive
+if [ "${#ignore_files[@]}" -ge 1 ]; then
+    find_arguments+=("-and" "!" "\(")
+    for i in "${!ignore_files[@]}"; do
+        if [ "$i" -ge 1 ]; then
+            find_arguments+=("-or")
+        fi
+        find_arguments+=("-iname" "'${ignore_files[$i]}'")
+    done
+    find_arguments+=("\)")
+fi
+
+# Add queries
+find_arguments+=("-and" "\(")
 for i in "${!queries[@]}"; do
 
     # If -o flag is set and more than one query is given, add a logical OR
     if [ "$or" == true ] && [ "$i" -ge 1 ]; then
-        find_arguments+=("-o" "-not" "-path" "'*/\.*'" "-type" "f,l")
+        find_arguments+=("-or")
     fi
 
     # Use the ipath argument to search case-insensitive and surround query with wildcards
     find_arguments+=("-ipath" "'*${queries[$i]}*'")
 done
+find_arguments+=("\)")
 
 # Initialize result arrays
 sftp_results=()
@@ -381,7 +420,7 @@ if [ "$list" == false ]; then
         mpv --msg-level=all=error,statusline=status --watch-later-directory="$HOME/.cache/strm" --term-status-msg='${playlist-pos-1}/${playlist-count} - ${time-pos}/${duration} - \e[1m${metadata/artist:}${?metadata/artist: - }${metadata/album:}${?metadata/album: - }${metadata/title:}${!metadata/title:${filename/no-ext}}\e[0m' "${mpv_arguments[@]}" "${sftp_results[@]}"
     fi
 
-    # Synchronize playback directory back if not tidy and directory is set
+    # Synchronize playback directory back if directory is set
     if [ "$playback_directory" != "" ]; then
 
         # Get connection string and remote directory

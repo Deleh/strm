@@ -95,6 +95,7 @@
        -h, --help                                 Show this help message
        -c, --config CONFIG_FILE                   Path to config file (default: ~/.config/strm/strm.config)
        -f, --fullscreen                           Play video files in fullscreen
+       -i, --ignore-files IGNORE_FILES            Ignore given filenames
        -l, --list                                 List files instead of playing
        -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored
        -o, --or                                   Use a logical OR for queries (default: AND)
@@ -119,10 +120,11 @@
    - =f= :: Toggle fullscreen.
    - =q= :: Stop playing and quit.
      If the =playback_directory= is configured (or the =--playback-directory= argument ist set), the playback position of the current file is saved on exit and synchronized with the given directory.
-     Otherwise (or if the =--tidy= flag is set) the playback position is not saved on exit and nothing is synchronized.
+     Otherwise the playback position is not saved on exit and nothing is synchronized.
 
-   The last query arguments are saved if a =playback_directory= is set and neither the =--list= or =--tidy= flags are set.
+   The last query arguments are saved if a =playback_directory= is set and the =--list= flag is not set.
    If you want to resume playback at a later time, it is sufficient to call =strm= without arguments.
+   Use the =--tidy= flag to not resume playback.
 
    Resuming playback of a file over multiple machines is only possible if all machines are configured with the same =media_directory= path for the file.
    This is due to the fact that mpv stores the playback positions based on the filename hash, which in the case of remote files is the entire file path.
@@ -177,6 +179,14 @@
      #   remote-machine/home/alice/strm
      #   bob@another-machine/home/bob/strm
      playback_directory=""
+
+     # Ignored filenames as comma separated list.
+     # This can be glob patterns and matching is done case-insensitive.
+     # 
+     # Examples:
+     #   cover.jpg
+     #   *.jpg,*.png
+     ignore_files=""
    #+end_src
    
    An example configuration file can be found in the repository.
@@ -184,8 +194,8 @@
    The default path of the configuration is =$HOME/.config/strm/strm.config=.
    You can use the =--config= flag to set another configuration file.
    
-   The flags =--media-directories= and =--playback-directory= are used in favour of configuration parameters and can be used with the same syntax as described above.
-   Be aware that if the =--media-directories= flag is given, no configuraion file is loaded (even if explicitly set with =--config=) and thus the configured =playback_directory= is not used.
-   In this case use additionally the =--playback-directory= flag with the same value from your config file.
+   The flags =--media-directories=, =--playback-directory= and =--ignore-files= are used in favour of configuration parameters and can be used with the same syntax as described above.
+   Be aware that if the =--media-directories= flag is given, no configuraion file is loaded (even if explicitly set with =--config=) and thus the configured =playback_directory= and =ignore_files= is not used.
+   In this case use additionally the =--playback-directory= and =--ignore-files= flags with the same value from your config file.
 
    The local directory to which and from which the playback positions are synchronized is =$HOME/.cache/strm=.
