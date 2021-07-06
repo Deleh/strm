@@ -382,7 +382,6 @@ if [ "$list" == false ]; then
     # Save arguments for later call
     if [ "$playback_directory" != "" ]; then
         echo "queries=(${queries[@]})" > "$HOME/.cache/strm/strm_later"
-        echo "fullscreen=$fullscreen" >> "$HOME/.cache/strm/strm_later"
         echo "or=$or" >> "$HOME/.cache/strm/strm_later"
         echo "shuffle=$shuffle" >> "$HOME/.cache/strm/strm_later"
     fi
