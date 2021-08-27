@@ -219,7 +219,7 @@ if [ "$tmp_ignore_files" != "" ]; then
 fi
 
 # Synchronize playback directory
-if [ "$list" == false ] &&  [ "$playback_directory" != "" ]; then
+if [ "$list" == false ] && [ "$playback_directory" != "" ]; then
 
     # Check if rsync is installed
     if ! command -v rsync &>/dev/null; then
