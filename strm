@@ -12,22 +12,28 @@ Stream media files over SSH in a convenient way.
 
 OPTIONS
   -h, --help                                 Show this help message
-  -c, --config CONFIG_FILE                   Path to config file (default: ~/.config/strm/strm.config)
+  -c, --config CONFIG_FILE                   Path to config file
+                                             (default: ~/.config/strm/strm.config)
   -f, --fullscreen                           Play video files in fullscreen
   -i, --ignore-files IGNORE_FILES            Ignore given filenames
   -l, --list                                 List files instead of playing
-  -m, --media-directories MEDIA_DIRECTORIES  Use given media directories, config is ignored
-  -o, --or                                   Combine queries with a logical OR (default: AND)
+  -m, --media-directories MEDIA_DIRECTORIES  Use given media directories,
+                                             config is ignored
+  -o, --or                                   Combine queries with a logical OR
+                                             (default: AND)
   -p, --playback-directory DIRECTORY         Use given playback directory
-  -q, --quit TIME_IN_MINUTES                 Quit after a given time
-  -r, --remote SSH_CONNECTION_STRING         Execute strm with other given arguments on remote machine (-f is set by default)
+  -q, --quit TIME_IN_MINUTES                 Quit after given time
+  -r, --remote SSH_CONNECTION_STRING         Execute strm with other given
+                                             arguments on remote machine (-f is
+                                             set by default)
   -s, --shuffle                              Play files in random order
   -t, --tidy                                 Don't resume playback
 
 EXAMPLES
   strm -l .             # List all available files
   strm Elephants Dream  # Play files whose path contain 'elephants' and 'dream'
-  strm e*phants         # Play files whose path matches the glob pattern 'e*phants'
+  strm e*phants         # Play files whose path matches the glob pattern
+                        # 'e*phants'
 EOF
     exit
 }
