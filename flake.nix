@@ -1,7 +1,7 @@
 {
   description = "Stream media files over SSH";
 
-  nixConfig.bash-prompt = "\[strm-develop\]$ ";
+  nixConfig.bash-prompt = "\[\\e[1mstrm-dev\\e[0m:\\w\]$ ";
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
