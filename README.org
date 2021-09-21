@@ -7,7 +7,7 @@
 
   Here is an example.. let's assume you have the shortfilm [[https://www.dailydweebs.com/][The Daily Dweebs]] stored on a remote machine in the following directory structure:
 
-  #+begin_example text
+  #+begin_example
     media
     └── movies
         ├── ...
@@ -18,9 +18,7 @@
 
   If *strm* is configured to use the =media= directory, you can play the shortfilm e.g. with the following command:
 
-  #+begin_example sh
-    strm daily dweebs
-  #+end_example
+  : strm daily dweebs
 
   Every argument which is not assigned to an flag is interpreted as part of the query.
   The query arguments are interpreted as [[https://en.wikipedia.org/wiki/Glob_(programming)][glob patterns]], additionally surrounded by wildcards (=*=).
@@ -30,11 +28,9 @@
   
   The shortfilm from the example above could have also been played with one of the following commands:
 
-  #+begin_example sh
-    strm dweebs daily
-    strm movies dwee
-    strm d d 17
-  #+end_example
+  : strm dweebs daily
+  : strm movies dwee
+  : strm d d 17
 
   It is possible that multiple files are matched by one of the commands.
   All files are then played in the order of the configured media directories, followed by lexicographical order of the filepath.
@@ -78,15 +74,13 @@
    This project is also a [[https://nixos.wiki/wiki/Flakes][Nix flake]].
    You can execute it with the following command if you have a recent version of [[https://nixos.org/][Nix]] installed and flakes are enabled:
 
-   #+begin_example sh
-     nix run github:Deleh/strm -- --help
-   #+end_example
+   : nix run github:Deleh/strm -- --help
 
    If you use it this way, mpv is started with *MPRIS* support by default.
 
 ** Usage
 
-   #+begin_example text
+   #+begin_example
      Usage: strm [OPTIONS] QUERIES ... [OPTIONS]
 
      Stream media files over SSH in a convenient way.
