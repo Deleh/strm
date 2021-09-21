@@ -150,7 +150,7 @@
 
    If the =--media-directories= argument is not set, the script looks for a configuration file with the following content:
 
-   #+begin_example sh
+   #+begin_src sh
      # Media directories on remote machines of the following form:
      #
      #   <SSH connection string><absolute_path_to_media_directory>
@@ -187,7 +187,7 @@
      #   cover.jpg
      #   *.jpg,*.png
      ignore_files=""
-   #+end_example
+   #+end_src
    
    An example configuration file can be found in the repository.
    
