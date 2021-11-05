@@ -170,7 +170,7 @@ if [ "$remote" != "" ]; then
 
     # Check if dependencies are fulfilled on remote
     if ! ssh "$remote" "command -v mpv strm tmux &>/dev/null"; then
-        error "make sure ${text_bold}$remote${text_reset} is accessible and  mpv, strm and tmux are installed"
+        error "make sure ${text_bold}$remote${text_reset} is accessible and mpv, strm and tmux are installed"
     fi
 
     # Check if strm tmux session is already running
@@ -414,6 +414,12 @@ if [ "$list" == false ]; then
     fi
     if [ "$playback_directory" != "" ]; then
         mpv_arguments+=("--save-position-on-quit")
+
+        # Save only the playback position if mpv version is at least 0.34.0
+        [[ $(mpv --version | head -n 1) =~ [0-9]+.([0-9]+).[0-9]+ ]]
+        if [ ${BASH_REMATCH[1]} -ge 34 ]; then
+            mpv_arguments+=("--watch-later-options-clr")
+        fi
     fi
 
     # Play all remote files
