@@ -3,7 +3,10 @@
 
   nixConfig.bash-prompt = "\[\\e[1mstrm-dev\\e[0m:\\w\]$ ";
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs = {
+    nixpkgs.url = github:nixos/nixpkgs/nixos-unstable;
+    flake-utils.url = github:numtide/flake-utils;
+  };
 
   outputs = { self, nixpkgs, flake-utils }:
 
@@ -28,7 +31,7 @@
               src = self;
               patchPhase = with pkgs; ''
                 substituteInPlace strm \
-                  --replace mpv\  ${mpv}/bin/mpv\ 
+                  --replace mpv\  ${mpv}/bin/mpv\
               '';
               installPhase = ''
                 install -m 755 -D strm $out/bin/strm
