@@ -16,7 +16,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
 
           # Use mpv with scripts
-          mpv = (pkgs.mpv-with-scripts.override {
+          mpv = (pkgs.mpv.override {
             scripts = [
               pkgs.mpvScripts.mpris
             ];
