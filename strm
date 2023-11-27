@@ -154,7 +154,7 @@ while (( "$#" )); do
             remote_arguments+=("$1")
             shift
             ;;
-        -*|--*=)
+        -*)
             error "Unsupported flag: $1"
             ;;
         *)
@@ -190,7 +190,7 @@ if [ "$remote" != "" ]; then
         remote_arguments+=("--is-remote-call")
 
         # Execute strm on remote machine
-        ssh -o ConnectTimeout=10 -t "$remote" "DISPLAY=:0 tmux new-session -s strm 'tmux set-option status off; strm ${remote_arguments[@]}' &>/dev/null"
+        ssh -o ConnectTimeout=10 -t "$remote" "DISPLAY=:0 tmux new-session -s strm 'tmux set-option status off; strm ${remote_arguments[*]}' &>/dev/null"
     fi
     exit
 fi
@@ -253,7 +253,7 @@ if [ "$list" == false ] && [ "$playback_directory" != "" ]; then
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
 
-    echo -ne "Synchronizing playback directory with $text_bold$(basename $connection_string)$text_reset\n"
+    echo -ne "Synchronizing playback directory with $text_bold$(basename "$connection_string")$text_reset\n"
 
     # Make remote directory if not existent
     ssh -o ConnectTimeout=10 "$connection_string" "mkdir -p $directory"
@@ -272,10 +272,10 @@ if [ "${#queries[@]}" == 0 ]; then
 fi
 
 # Read media directories
-IFS="," read -a media_directories <<< "$media_directories"
+IFS="," read -ar media_directories <<< "$media_directories"
 
 # Read ignore files
-IFS="," read -a ignore_files <<< "$ignore_files"
+IFS="," read -ar ignore_files <<< "$ignore_files"
 
 # Construct find argument array
 
@@ -337,7 +337,7 @@ for media_directory in "${media_directories[@]}"; do
     # Add leading and trailing slash to directory if missing
     [[ "$directory" != /*/ ]] && directory="/$directory/"
 
-    echo -ne "Fetching results from $text_bold$(basename $directory)$text_reset on $text_bold$connection_string$text_reset\n"
+    echo -ne "Fetching results from $text_bold$(basename "$directory")$text_reset on $text_bold$connection_string$text_reset\n"
 
     # Get search results from remote
     # Look for paths matching given queries in visible directories, listing only filenames and links
@@ -359,7 +359,7 @@ echo
 if [ "${#sftp_results[@]}" == 0 ]; then
     if [ "$is_remote_call" == true ]; then
         echo "No files found, press something to quit"
-        read -n 1
+        read -nr 1
     else
         echo "No files found"
     fi
@@ -389,7 +389,7 @@ if [ "$list" == false ]; then
 
     # Save arguments for later call
     if [ "$playback_directory" != "" ]; then
-        echo "queries=(${queries[@]})" > "$HOME/.cache/strm/strm_later"
+        echo "queries=(${queries[*]})" > "$HOME/.cache/strm/strm_later"
         echo "or=$or" >> "$HOME/.cache/strm/strm_later"
         echo "shuffle=$shuffle" >> "$HOME/.cache/strm/strm_later"
     fi
@@ -417,7 +417,7 @@ if [ "$list" == false ]; then
 
         # Save only the playback position if mpv version is at least 0.34.0
         [[ $(mpv --version | head -n 1) =~ [0-9]+.([0-9]+).[0-9]+ ]]
-        if [ ${BASH_REMATCH[1]} -ge 34 ]; then
+        if [ "${BASH_REMATCH[1]}" -ge 34 ]; then
             mpv_arguments+=("--watch-later-options-clr")
         fi
     fi
@@ -447,7 +447,7 @@ if [ "$list" == false ]; then
         # Add leading and trailing slash to directory if missing
         [[ "$directory" != /*/ ]] && directory="/$directory/"
 
-        echo -ne "\nSynchronizing playback directory with $text_bold$(basename $connection_string)$text_reset"
+        echo -ne "\nSynchronizing playback directory with $text_bold$(basename "$connection_string")$text_reset"
 
         # Synchronize local to remote
         rsync -az --delete "$HOME/.cache/strm/" "$connection_string:$directory"
